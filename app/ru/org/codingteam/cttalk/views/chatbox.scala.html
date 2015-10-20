@@ -1,0 +1,22 @@
+@()
+<div class="panel panel-default" ng-controller="ChatboxController as chatbox">
+    <div class="panel-heading">{{chat.name}}</div>
+    <div class="panel-body">
+        <div ng-repeat="message in chat.messages">
+            <b>{{message.sender}}</b>: {{message.text}}
+        </div>
+    </div>
+    <div class="panel-footer">
+        <form class="form-inline" ng-submit="post()">
+            <div class="form-group">
+                <label class="sr-only" for="sender">Name</label>
+                <input type="text" ng-model="chatbox.sender" class="form-control" id="sender" placeholder="Name">
+            </div>
+            <div class="form-group">
+                <label class="sr-only" for="text">Text</label>
+                <input type="text" ng-model="chatbox.text" class="form-control" id="text" placeholder="Text">
+            </div>
+            <button type="submit" class="btn btn-default">Send</button>
+        </form>
+    </div>
+</div>

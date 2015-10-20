@@ -1,0 +1,8 @@
+GET /   ru.org.codingteam.cttalk.controllers.MainController.index
+
+GET /api/chats              @ru.org.codingteam.cttalk.controllers.api.ChatController.chats
+GET /api/unread/:token      @ru.org.codingteam.cttalk.controllers.api.ChatController.unread(token)
+
+POST /api/register          @ru.org.codingteam.cttalk.controllers.api.SecurityController.register
+
+GET /js/*file   controllers.Assets.at(path="/public/js", file)
