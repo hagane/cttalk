@@ -22,28 +22,23 @@ trait UserService {
   def auth(name: String, password: String): Future[Option[String]]
 }
 
-class UserServiceImpl @Inject()(users: UserRepository) extends UserService {
+class UserServiceImpl @Inject()(users: UserRepository, tokens: TokensRepository) extends UserService {
   def createUser(name: String, password: String): Future[WriteResult] = {
     val digest: MessageDigest = MessageDigest.getInstance("SHA-256")
     val hashedPassword: String = BigInt(digest.digest(password.getBytes("UTF-8"))).toString(16)
-    val user = User(name, hashedPassword, "")
+    val user = User(name, hashedPassword)
     users.save(user)
   }
 
   def auth(name: String, password: String): Future[Option[String]] = {
     val digest: MessageDigest = MessageDigest.getInstance("SHA-256")
     val sentPasswordHash: String = BigInt(digest.digest(password.getBytes("UTF-8"))).toString(16)
-    val newToken = Random.nextLong().toHexString
 
     users.getByName(name).map(maybeUser => maybeUser.filter(user => user.passwordHash.equals(sentPasswordHash)))
       .flatMap({
       case None => Future.successful(None)
-      case Some(user) => users.setToken(user, newToken).map({ result =>
-        if (result.ok) {
-          Some(newToken)
-        } else {
-          None
-        }
+      case Some(user) => tokens.create(user).map( maybeToken => {
+        maybeToken.map(token => token._id)
       })
     })
   }
