@@ -37,7 +37,7 @@ class UserServiceImpl @Inject()(users: UserRepository) extends UserService {
 
     users.getByName(name).map(maybeUser => maybeUser.filter(user => user.passwordHash.equals(sentPasswordHash)))
       .flatMap({
-      case None => Future.failed(new RuntimeException("Invalid username or password"))
+      case None => Future.successful(None)
       case Some(user) => users.setToken(user, newToken).map({ result =>
         if (result.ok) {
           Some(newToken)
