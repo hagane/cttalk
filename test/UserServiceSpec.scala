@@ -1,6 +1,5 @@
 import java.security.MessageDigest
 
-import akka.util.Timeout
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mock._
 import play.api.test.PlaySpecification
@@ -9,7 +8,6 @@ import ru.org.codingteam.cttalk.models.User
 import ru.org.codingteam.cttalk.services.{UserRepository, UserServiceImpl}
 
 import scala.concurrent.Future
-import scala.concurrent.duration._
 
 /**
  * Created by hgn on 25.10.2015.
