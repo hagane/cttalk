@@ -1,6 +1,5 @@
 package ru.org.codingteam.cttalk.controllers.api
 
-import java.lang.RuntimeException
 import javax.inject.Inject
 
 import play.api.libs.concurrent.Execution.Implicits._
@@ -18,13 +17,9 @@ class SecurityController @Inject()(userService: UserService) extends Controller 
     (JsPath \ 'password).read[String] tupled
 
   def register = httpsOnlyAsync(jsonAsync[(String, String)] {
-    case (name, password) => userService.createUser(name, password)
-      .map(result =>
-      if (result.ok) {
-        Ok("")
-      } else {
-        result.errmsg.map(msg => Unauthorized(msg)).getOrElse(InternalServerError(result.message))
-      })
+    case (name, password) => userService.createUser(name, password) map { _ => Ok} recover {
+      case _ => Unauthorized
+    }
   })
 
   def auth = httpsOnlyAsync(jsonAsync[(String, String)] {

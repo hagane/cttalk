@@ -20,7 +20,7 @@ class UserServiceSpec extends PlaySpecification with Mockito {
   def mockTokensRepository = {
     val mockRepository = mock[TokensRepository]
     mockRepository.create(any[User]) answers { user =>
-      Future.successful(Some(Token("token", user.asInstanceOf[User].name)))
+      Future.successful(Token("token", user.asInstanceOf[User].name))
     }
 
     mockRepository
@@ -40,38 +40,28 @@ class UserServiceSpec extends PlaySpecification with Mockito {
   "UserService.createUser" should {
     "-- write user to db if there is no user with given name" in { implicit ee: ExecutionEnv =>
       val mockUserRepository = mock[UserRepository]
-      val successfulResult = mock[WriteResult]
-      successfulResult.ok returns true
-      mockUserRepository.save(org.mockito.Matchers.any[User]) returns Future.successful(successfulResult)
+      mockUserRepository.save(org.mockito.Matchers.any[User]) returns Future.successful(User("", ""))
 
       val service = new UserServiceImpl(mockUserRepository, mockTokensRepository, mockMessagesService)
-      service.createUser("testname", "test") map {
-        r => r.ok must be equalTo true
-      } await
+      service.createUser("testname", "test") map { user => user must beAnInstanceOf[User] } await
     }
 
     "-- fail when user with given name already exists" in { implicit ee: ExecutionEnv =>
       val mockUsersRepository = mock[UserRepository]
-      val failedResult = mock[WriteResult]
-      failedResult.ok returns false
-      val successfulResult = mock[WriteResult]
-      successfulResult.ok returns true
       val username = "testname"
 
       mockUsersRepository.save(org.mockito.Matchers.any[User]) answers { user =>
         val u = user.asInstanceOf[User]
 
         if (username.equals(u.name)) {
-          Future.successful(failedResult)
+          Future.failed(new RuntimeException)
         } else {
-          Future.successful(successfulResult)
+          Future.successful(u)
         }
       }
 
       val service = new UserServiceImpl(mockUsersRepository, mockTokensRepository, mockMessagesService)
-      service.createUser(username, "test") map {
-        r => r.ok must be equalTo false
-      } await
+      service.createUser(username, "test") must throwA[RuntimeException].await
     }
   }
 
@@ -115,10 +105,10 @@ class UserServiceSpec extends PlaySpecification with Mockito {
       mockUsersRepository.getByNameAndPasswordHash(anyString, anyString) returns Future.successful(None)
 
       val service = new UserServiceImpl(mockUsersRepository, mockTokensRepository, mockMessagesService)
-      service.auth("testname", "testpassword") must throwA[Throwable].await
+      service.auth("testname", "testpassword") must throwA[RuntimeException].await
     }
 
-    "-- fail if password does not matches" in { implicit ee: ExecutionEnv =>
+    "-- fail if password does not match" in { implicit ee: ExecutionEnv =>
       val digest: MessageDigest = MessageDigest.getInstance("SHA-256")
       val hash: String = BigInt(digest.digest("testpassword".getBytes("UTF-8"))).toString(16)
       val newToken = "token"
@@ -127,7 +117,7 @@ class UserServiceSpec extends PlaySpecification with Mockito {
       mockUsersRepository.getByNameAndPasswordHash(anyString, anyString) returns Future.successful(Some(User("testname", hash)))
 
       val service = new UserServiceImpl(mockUsersRepository, mockTokensRepository, mockMessagesService)
-      service.auth("testname", "wrongpassword") must throwA[Throwable].await
+      service.auth("testname", "wrongpassword") must throwA[RuntimeException].await
     }
   }
 }

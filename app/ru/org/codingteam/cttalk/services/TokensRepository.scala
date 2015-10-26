@@ -21,7 +21,7 @@ import scala.util.Random
 trait TokensRepository {
   def get(id: String): Future[Option[Token]]
 
-  def create(user: User): Future[Option[Token]]
+  def create(user: User): Future[Token]
 }
 
 class TokensRepositoryImpl @Inject()(mongo: ReactiveMongoApi) extends TokensRepository {
@@ -32,19 +32,13 @@ class TokensRepositoryImpl @Inject()(mongo: ReactiveMongoApi) extends TokensRepo
     tokens.find(Json.obj("_id" -> id)).one[Token]
   }
 
-  override def create(user: User): Future[Option[Token]] = {
+  override def create(user: User): Future[Token] = {
     implicit val writes =
       ((JsPath \ "_id").write[String] and
         (JsPath \ "username").write[String])(unlift(Token.unapply))
     val nextId = Random.nextLong().toHexString //TODO replace this with injected secure-er generator
     val token = Token(nextId, user.name)
-    tokens.insert(token) map { result =>
-      if (result.ok) {
-        Some(token)
-      } else {
-        None
-      }
-    }
+    tokens.insert(token) map { _ => token }
   }
 
   def tokens = mongo.db.collection[JSONCollection]("tokens")

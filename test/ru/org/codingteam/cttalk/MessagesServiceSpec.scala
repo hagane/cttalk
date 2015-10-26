@@ -38,7 +38,7 @@ class MessagesServiceSpec extends PlaySpecification with Mockito {
     "-- fail when sending to unknown recipient" in { implicit ee: ExecutionEnv =>
       val service = new MessagesServiceImpl
       val token: Token = Token("unknown", "username")
-      service.send(token, Message("sender", new Date(), "message")) must throwA[Throwable].await
+      service.send(token, Message("sender", new Date(), "message")) must throwA[RuntimeException].await
     }
   }
 
