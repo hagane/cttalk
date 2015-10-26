@@ -16,32 +16,22 @@ import scala.concurrent.Future
 trait MessagesService {
   def send(to: Token, message: Message): Future[Boolean]
 
-  def get(receiverToken: String): Future[Seq[Message]]
-
-  def register(token: Token, receiver: MessageReceiver): Future[Unit]
+  def register(token: Token, receiver: MessageReceiver): Future[Token]
 }
 
 class MessagesServiceImpl extends MessagesService {
-  val receivers = new ConcurrentHashMap[Token, util.Queue[Message]]
+  val receivers = new ConcurrentHashMap[Token, MessageReceiver]
 
   override def send(to: Token, message: Message): Future[Boolean] = {
-    val queue: util.Queue[Message] = receivers.computeIfAbsent(to, asJavaFunction { _ => new ConcurrentLinkedQueue[Message]() })
-    Future.successful(queue.offer(message))
+    Option(receivers.get(to)) map { receiver =>
+      Future.successful(receiver.receive(message))
+    } getOrElse Future.failed(new RuntimeException("token not registered"))
   }
 
-  override def get(receiverToken: String): Future[Seq[Message]] = {
-    val messages: Option[util.Queue[Message]] = Option(receivers.get(receiverToken))
-    Future.successful(messages map consuming getOrElse Seq())
-  }
-
-  override def register(token: Token, receiver: MessageReceiver): Future[Unit] = {
-    Future.successful()
-  }
-
-  private def consuming[T](queue: util.Queue[T]): Seq[T] = {
-    Option(queue.poll) match {
-      case None => Seq()
-      case Some(t) => Seq(t) ++ consuming(queue)
+  override def register(token: Token, receiver: MessageReceiver): Future[Token] = {
+    Option(receivers.putIfAbsent(token, receiver)) match {
+      case None => Future.successful(token)
+      case Some(_) => Future.failed(new RuntimeException("token already present"))
     }
   }
 }

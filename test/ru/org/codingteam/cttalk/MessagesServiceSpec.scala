@@ -17,8 +17,9 @@ class MessagesServiceSpec extends PlaySpecification with Mockito {
   private class MockReceiver extends MessageReceiver {
     private val list = List.newBuilder[Message]
 
-    override def receive(message: Message): Unit = {
+    override def receive(message: Message): Boolean = {
       list += message
+      true
     }
 
     def get: Seq[Message] = list.result()
@@ -28,7 +29,7 @@ class MessagesServiceSpec extends PlaySpecification with Mockito {
     "-- succeed when sending to existing recipient" in { implicit ee: ExecutionEnv =>
       val service = new MessagesServiceImpl
       val token: Token = Token("existing", "username")
-      service.register(token, mock[MessageReceiver])
+      service.register(token, new MockReceiver)
       service.send(token, Message("sender", new Date(), "message")) map {
         result => result mustEqual true
       } await
@@ -37,50 +38,7 @@ class MessagesServiceSpec extends PlaySpecification with Mockito {
     "-- fail when sending to unknown recipient" in { implicit ee: ExecutionEnv =>
       val service = new MessagesServiceImpl
       val token: Token = Token("unknown", "username")
-      service.send(token, Message("sender", new Date(), "message")) map {
-        result => result mustEqual false
-      } await
-    }
-  }
-
-  "MessageService.get" should {
-    "-- receive previously sent messages" in { implicit ee: ExecutionEnv =>
-      val service = new MessagesServiceImpl
-      val receiver = new MockReceiver
-      val message: Message = Message("sender", new Date, "test")
-      val token: Token = Token("receiver", "username")
-
-      service.register(token, receiver)
-      service.send(token, message) map { result => result mustEqual true } await
-
-      receiver.get.length mustEqual 1
-      receiver.get.contains(message) mustEqual true
-    }
-
-    "-- return empty sequence if there is no messages" in { implicit ee: ExecutionEnv =>
-      val service = new MessagesServiceImpl
-      val receiver = new MockReceiver
-      val message: Message = Message("sender", new Date, "test")
-      val token: Token = Token("receiver", "username")
-
-      service.register(token, receiver) map { _ => success } await
-
-      receiver.get.length mustEqual 0
-    }
-
-    "-- fail if trying to send messages to unknown recipient" in { implicit ee: ExecutionEnv =>
-      val service = new MessagesServiceImpl
-      val message: Message = Message("sender", new Date, "test")
-      val token: Token = Token("receiver", "username")
-
-      service.send(token, message) must throwA[Throwable].await
-    }
-
-    "-- fail if trying to get messages for unknown recipient" in { implicit ee: ExecutionEnv =>
-      val service = new MessagesServiceImpl
-      val message: Message = Message("sender", new Date, "test")
-
-      service.get("receiver") must throwA[Throwable].await
+      service.send(token, Message("sender", new Date(), "message")) must throwA[Throwable].await
     }
   }
 

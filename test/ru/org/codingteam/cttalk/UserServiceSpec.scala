@@ -77,6 +77,10 @@ class UserServiceSpec extends PlaySpecification with Mockito {
       service.auth("testname", "testpassword") map { result => result must beSome[String] } await
     }
 
+    "-- register token after successful authentication" in {
+      skipped("todo")
+    }
+
     "-- fail if user does not exists" in { implicit ee: ExecutionEnv =>
       val digest: MessageDigest = MessageDigest.getInstance("SHA-256")
       val hash: String = BigInt(digest.digest("testpassword".getBytes("UTF-8"))).toString(16)
