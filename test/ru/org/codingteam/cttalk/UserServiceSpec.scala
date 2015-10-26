@@ -6,7 +6,7 @@ import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mock._
 import play.api.test.PlaySpecification
 import reactivemongo.api.commands.WriteResult
-import ru.org.codingteam.cttalk.models.User
+import ru.org.codingteam.cttalk.models.{Token, User}
 import ru.org.codingteam.cttalk.services.{TokensRepository, UserRepository, UserServiceImpl}
 
 import scala.concurrent.Future
@@ -17,14 +17,19 @@ import scala.concurrent.Future
 class UserServiceSpec extends PlaySpecification with Mockito {
   sequential
 
+  def mockTokensRepository = {
+    val mockTokensRepository = mock[TokensRepository]
+    mockTokensRepository.create(any[User]) answers { user =>
+      Future.successful(Some(Token("token", user.asInstanceOf[User].name)))
+    }
+  }
+
   "UserService.createUser" should {
     "-- write user to db if there is no user with given name" in { implicit ee: ExecutionEnv =>
       val mockUserRepository = mock[UserRepository]
       val successfulResult = mock[WriteResult]
       successfulResult.ok returns true
       mockUserRepository.save(org.mockito.Matchers.any[User]) returns Future.successful(successfulResult)
-
-      val mockTokensRepository = mock[TokensRepository]
 
       val service = new UserServiceImpl(mockUserRepository, mockTokensRepository)
       service.createUser("testname", "test") map {
@@ -38,10 +43,7 @@ class UserServiceSpec extends PlaySpecification with Mockito {
       failedResult.ok returns false
       val successfulResult = mock[WriteResult]
       successfulResult.ok returns true
-
       val username = "testname"
-
-      val mockTokensRepository = mock[TokensRepository]
 
       mockUsersRepository.save(org.mockito.Matchers.any[User]) answers { user =>
         val u = user.asInstanceOf[User]
@@ -69,8 +71,6 @@ class UserServiceSpec extends PlaySpecification with Mockito {
       val successfulResult = mock[WriteResult]
       successfulResult.ok returns true
 
-      val mockTokensRepository = mock[TokensRepository]
-
       mockUsersRepository.getByName(anyString) returns Future.successful(Some(User("testname", hash)))
 
       val service = new UserServiceImpl(mockUsersRepository, mockTokensRepository)
@@ -85,8 +85,6 @@ class UserServiceSpec extends PlaySpecification with Mockito {
 
       mockUsersRepository.getByName(anyString) returns Future.successful(None)
 
-      val mockTokensRepository = mock[TokensRepository]
-
       val service = new UserServiceImpl(mockUsersRepository, mockTokensRepository)
       service.auth("testname", "testpassword") map { result => result must beNone } await
     }
@@ -98,8 +96,6 @@ class UserServiceSpec extends PlaySpecification with Mockito {
       val mockUsersRepository = mock[UserRepository]
 
       mockUsersRepository.getByName(anyString) returns Future.successful(Some(User("testname", hash)))
-
-      val mockTokensRepository = mock[TokensRepository]
 
       val service = new UserServiceImpl(mockUsersRepository, mockTokensRepository)
       service.auth("testname", "wrongpassword") map { result => result must beNone } await
