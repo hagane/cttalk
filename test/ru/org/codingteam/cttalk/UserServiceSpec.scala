@@ -1,10 +1,12 @@
+package ru.org.codingteam.cttalk
+
 import java.security.MessageDigest
 
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mock._
 import play.api.test.PlaySpecification
 import reactivemongo.api.commands.WriteResult
-import ru.org.codingteam.cttalk.models.{Token, User}
+import ru.org.codingteam.cttalk.models.User
 import ru.org.codingteam.cttalk.services.{TokensRepository, UserRepository, UserServiceImpl}
 
 import scala.concurrent.Future

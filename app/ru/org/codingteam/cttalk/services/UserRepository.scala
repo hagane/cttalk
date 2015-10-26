@@ -4,10 +4,10 @@ import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
 import play.api.libs.concurrent.Execution.Implicits._
-import play.api.libs.json.{JsObject, JsPath, Json}
+import play.api.libs.functional.syntax._
+import play.api.libs.json.{JsPath, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import play.modules.reactivemongo.json._
-import play.api.libs.functional.syntax._
 import play.modules.reactivemongo.json.collection.JSONCollection
 import reactivemongo.api.commands.WriteResult
 import ru.org.codingteam.cttalk.models.{Token, User}
@@ -29,11 +29,13 @@ trait UserRepository {
 class UserRepositoryImpl @Inject()(mongo: ReactiveMongoApi) extends UserRepository {
 
   implicit val reads = ((JsPath \ "name").read[String] and
-    (JsPath \ "passwordHash").read[String]) (User.apply _)
+    (JsPath \ "passwordHash").read[String])(User.apply _)
 
   override def getByName(name: String): Future[Option[User]] = {
     users.find(Json.obj("name" -> name)).one[User]
   }
+
+  def users: JSONCollection = mongo.db.collection[JSONCollection]("users")
 
   override def getByToken(token: Token): Future[Option[User]] = {
     users.find(Json.obj("name" -> token.username)).one[User]
@@ -47,6 +49,4 @@ class UserRepositoryImpl @Inject()(mongo: ReactiveMongoApi) extends UserReposito
     )
     users.insert(jsonUser)
   }
-
-  def users: JSONCollection = mongo.db.collection[JSONCollection]("users")
 }

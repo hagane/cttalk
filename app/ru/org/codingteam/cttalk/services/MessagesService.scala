@@ -4,7 +4,7 @@ import java.util
 import java.util.concurrent.{ConcurrentHashMap, ConcurrentLinkedQueue}
 
 import com.google.inject.ImplementedBy
-import ru.org.codingteam.cttalk.models.{MessageReceiver, Message, User}
+import ru.org.codingteam.cttalk.models.{Message, MessageReceiver, Token}
 import ru.org.codingteam.cttalk.util.JavaFunctionConversions._
 
 import scala.concurrent.Future
@@ -14,18 +14,18 @@ import scala.concurrent.Future
  */
 @ImplementedBy(classOf[MessagesServiceImpl])
 trait MessagesService {
-  def send(to: String, message: Message): Future[Boolean]
+  def send(to: Token, message: Message): Future[Boolean]
 
   def get(receiverToken: String): Future[Seq[Message]]
 
-  def register(token: String, receiver: MessageReceiver)
+  def register(token: Token, receiver: MessageReceiver): Future[Unit]
 }
 
 class MessagesServiceImpl extends MessagesService {
-  val receivers = new ConcurrentHashMap[String, util.Queue[Message]]
+  val receivers = new ConcurrentHashMap[Token, util.Queue[Message]]
 
-  override def send(to: String, message: Message): Future[Boolean] = {
-    val queue: util.Queue[Message] = receivers.computeIfAbsent(to, asJavaFunction {_ => new ConcurrentLinkedQueue[Message]()})
+  override def send(to: Token, message: Message): Future[Boolean] = {
+    val queue: util.Queue[Message] = receivers.computeIfAbsent(to, asJavaFunction { _ => new ConcurrentLinkedQueue[Message]() })
     Future.successful(queue.offer(message))
   }
 
@@ -34,9 +34,11 @@ class MessagesServiceImpl extends MessagesService {
     Future.successful(messages map consuming getOrElse Seq())
   }
 
-  override def register(token: String, receiver: MessageReceiver): Unit = {}
+  override def register(token: Token, receiver: MessageReceiver): Future[Unit] = {
+    Future.successful()
+  }
 
-  private def consuming[T](queue: util.Queue[T]):Seq[T] = {
+  private def consuming[T](queue: util.Queue[T]): Seq[T] = {
     Option(queue.poll) match {
       case None => Seq()
       case Some(t) => Seq(t) ++ consuming(queue)

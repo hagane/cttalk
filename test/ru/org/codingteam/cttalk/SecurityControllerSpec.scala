@@ -1,3 +1,5 @@
+package ru.org.codingteam.cttalk
+
 import org.specs2.mock.Mockito
 import play.api.libs.json.Json
 import play.api.mvc.Result
