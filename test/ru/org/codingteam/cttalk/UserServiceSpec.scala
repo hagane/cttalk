@@ -61,7 +61,7 @@ class UserServiceSpec extends PlaySpecification with Mockito {
       }
 
       val service = new UserServiceImpl(mockUsersRepository, mockTokensRepository, mockMessagesService)
-      service.createUser(username, "test") must throwA[RuntimeException].await
+      service.createUser(username, "test") must throwA[Exception].await
     }
   }
 
@@ -105,7 +105,7 @@ class UserServiceSpec extends PlaySpecification with Mockito {
       mockUsersRepository.getByNameAndPasswordHash(anyString, anyString) returns Future.successful(None)
 
       val service = new UserServiceImpl(mockUsersRepository, mockTokensRepository, mockMessagesService)
-      service.auth("testname", "testpassword") must throwA[RuntimeException].await
+      service.auth("testname", "testpassword") must throwA[Exception].await
     }
 
     "-- fail if password does not match" in { implicit ee: ExecutionEnv =>
@@ -117,7 +117,7 @@ class UserServiceSpec extends PlaySpecification with Mockito {
       mockUsersRepository.getByNameAndPasswordHash(anyString, anyString) returns Future.successful(Some(User("testname", hash)))
 
       val service = new UserServiceImpl(mockUsersRepository, mockTokensRepository, mockMessagesService)
-      service.auth("testname", "wrongpassword") must throwA[RuntimeException].await
+      service.auth("testname", "wrongpassword") must throwA[Exception].await
     }
   }
 }

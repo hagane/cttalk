@@ -38,7 +38,7 @@ class MessagesServiceSpec extends PlaySpecification with Mockito {
     "-- fail when sending to unknown recipient" in { implicit ee: ExecutionEnv =>
       val service = new MessagesServiceImpl
       val token: Token = Token("unknown", "username")
-      service.send(token, Message("sender", new Date(), "message")) must throwA[RuntimeException].await
+      service.send(token, Message("sender", new Date(), "message")) must throwA[Exception].await
     }
   }
 
@@ -46,10 +46,13 @@ class MessagesServiceSpec extends PlaySpecification with Mockito {
     "-- register recipient if token is not previously registered" in {
       success("tested in other tests")
     }
+
     "-- fail if trying to register an already registered recipient" in { implicit ee: ExecutionEnv =>
       val service = new MessagesServiceImpl
       val token: Token = Token("receiver", "username")
       service.register(token, new MockReceiver) map { _ => success } await
+
+      service.register(token, new MockReceiver) must throwA[Exception].await
     }
   }
 }
