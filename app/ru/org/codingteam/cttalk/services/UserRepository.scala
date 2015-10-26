@@ -21,7 +21,7 @@ import scala.concurrent.Future
 trait UserRepository {
   def getByToken(token: Token): Future[Option[User]]
 
-  def getByName(name: String): Future[Option[User]]
+  def getByNameAndPasswordHash(name: String, passwordHash: String): Future[Option[User]]
 
   def save(user: User): Future[WriteResult]
 }
@@ -31,8 +31,8 @@ class UserRepositoryImpl @Inject()(mongo: ReactiveMongoApi) extends UserReposito
   implicit val reads = ((JsPath \ "name").read[String] and
     (JsPath \ "passwordHash").read[String])(User.apply _)
 
-  override def getByName(name: String): Future[Option[User]] = {
-    users.find(Json.obj("name" -> name)).one[User]
+  override def getByNameAndPasswordHash(name: String, passwordHash: String): Future[Option[User]] = {
+    users.find(Json.obj("name" -> name, "passwordHash" -> passwordHash)).one[User]
   }
 
   def users: JSONCollection = mongo.db.collection[JSONCollection]("users")

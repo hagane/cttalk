@@ -1,5 +1,6 @@
 package ru.org.codingteam.cttalk.controllers.api
 
+import java.lang.RuntimeException
 import javax.inject.Inject
 
 import play.api.libs.concurrent.Execution.Implicits._
@@ -27,10 +28,10 @@ class SecurityController @Inject()(userService: UserService) extends Controller 
   })
 
   def auth = httpsOnlyAsync(jsonAsync[(String, String)] {
-    case (name, password) => userService.auth(name, password)
-      .map({
-      case Some(token) => Ok(Json.obj("token" -> token))
-      case None => Unauthorized(Json.obj())
-    })
+    case (name, password) => userService.auth(name, password) map { token =>
+      Ok(Json.obj("token" -> token._id))
+    } recover {
+      case _ => Unauthorized
+    }
   })
 }

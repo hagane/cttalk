@@ -6,7 +6,7 @@ import javax.inject.Inject
 import com.google.inject.ImplementedBy
 import play.api.libs.concurrent.Execution.Implicits._
 import reactivemongo.api.commands.WriteResult
-import ru.org.codingteam.cttalk.models.User
+import ru.org.codingteam.cttalk.models.{Message, MessageReceiver, Token, User}
 
 import scala.concurrent.Future
 import scala.util.Random
@@ -19,10 +19,10 @@ import scala.util.Random
 trait UserService {
   def createUser(name: String, password: String): Future[WriteResult]
 
-  def auth(name: String, password: String): Future[Option[String]]
+  def auth(name: String, password: String): Future[Token]
 }
 
-class UserServiceImpl @Inject()(users: UserRepository, tokens: TokensRepository) extends UserService {
+class UserServiceImpl @Inject()(users: UserRepository, tokens: TokensRepository, messages: MessagesService) extends UserService {
   def createUser(name: String, password: String): Future[WriteResult] = {
     val digest: MessageDigest = MessageDigest.getInstance("SHA-256")
     val hashedPassword: String = BigInt(digest.digest(password.getBytes("UTF-8"))).toString(16)
@@ -30,16 +30,21 @@ class UserServiceImpl @Inject()(users: UserRepository, tokens: TokensRepository)
     users.save(user)
   }
 
-  def auth(name: String, password: String): Future[Option[String]] = {
+  def auth(name: String, password: String): Future[Token] = {
     val digest: MessageDigest = MessageDigest.getInstance("SHA-256")
     val sentPasswordHash: String = BigInt(digest.digest(password.getBytes("UTF-8"))).toString(16)
 
-    users.getByName(name).map(maybeUser => maybeUser.filter(user => user.passwordHash.equals(sentPasswordHash)))
-      .flatMap({
-      case None => Future.successful(None)
-      case Some(user) => tokens.create(user).map( maybeToken => {
-        maybeToken.map(token => token._id)
-      })
-    })
+    val receiver = new MessageReceiver { //todo replace with something working
+      override def receive(message: Message): Boolean = true
+    }
+
+    users.getByNameAndPasswordHash(name, sentPasswordHash) flatMap {
+      case None => Future.failed(new RuntimeException("invalid credentials"))
+      case Some(user) =>
+        tokens.create(user) flatMap {
+          case None => Future.failed(new RuntimeException("could not create a token"))
+          case Some(token) => messages.register(token, receiver)
+        }
+    }
   }
 }
