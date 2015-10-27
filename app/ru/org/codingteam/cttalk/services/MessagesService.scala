@@ -1,11 +1,10 @@
 package ru.org.codingteam.cttalk.services
 
-import java.util
-import java.util.concurrent.{ConcurrentHashMap, ConcurrentLinkedQueue}
+import java.util.concurrent.ConcurrentHashMap
 
 import com.google.inject.ImplementedBy
-import ru.org.codingteam.cttalk.models.{Message, MessageReceiver, Token}
-import ru.org.codingteam.cttalk.util.JavaFunctionConversions._
+import ru.org.codingteam.cttalk.models.{Message, Token}
+import ru.org.codingteam.cttalk.services.messaging.MessageReceiver
 
 import scala.concurrent.Future
 

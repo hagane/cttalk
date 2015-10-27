@@ -5,7 +5,8 @@ import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
 import play.api.libs.concurrent.Execution.Implicits._
-import ru.org.codingteam.cttalk.models.{Message, MessageReceiver, Token, User}
+import ru.org.codingteam.cttalk.models.{Message, Token, User}
+import ru.org.codingteam.cttalk.services.messaging.MessageReceiver
 
 import scala.concurrent.Future
 
@@ -32,7 +33,8 @@ class UserServiceImpl @Inject()(users: UserRepository, tokens: TokensRepository,
     val digest: MessageDigest = MessageDigest.getInstance("SHA-256")
     val sentPasswordHash: String = BigInt(digest.digest(password.getBytes("UTF-8"))).toString(16)
 
-    val receiver = new MessageReceiver { //todo replace with something working
+    val receiver = new MessageReceiver {
+      //todo replace with something working
       override def receive(message: Message): Boolean = true
     }
 
