@@ -1,9 +1,11 @@
 package ru.org.codingteam.cttalk.services
 
 import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
-import ru.org.codingteam.cttalk.models.{Message, Token}
+import play.api.libs.concurrent.Execution.Implicits._
+import ru.org.codingteam.cttalk.models.{Handle, Message, Token}
 import ru.org.codingteam.cttalk.services.messaging.MessageReceiver
 
 import scala.concurrent.Future
@@ -13,17 +15,17 @@ import scala.concurrent.Future
  */
 @ImplementedBy(classOf[MessagesServiceImpl])
 trait MessagesService {
-  def send(to: Token, message: Message): Future[Boolean]
+  def send(to: Handle, message: Message): Future[Boolean]
 
   def register(token: Token, receiver: MessageReceiver): Future[Token]
 }
 
-class MessagesServiceImpl extends MessagesService {
+class MessagesServiceImpl @Inject()(messages: MessagesRepository) extends MessagesService {
   val receivers = new ConcurrentHashMap[Token, MessageReceiver]
 
-  override def send(to: Token, message: Message): Future[Boolean] = {
+  override def send(to: Handle, message: Message): Future[Boolean] = {
     Option(receivers.get(to)) map { receiver =>
-      Future.successful(receiver.receive(message))
+      messages.save(message) flatMap receiver.receive
     } getOrElse Future.failed(new RuntimeException("token not registered"))
   }
 

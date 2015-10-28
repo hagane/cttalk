@@ -1,5 +1,6 @@
 package ru.org.codingteam.cttalk.services.messaging
 
+import play.api.libs.concurrent.Execution.Implicits._
 import ru.org.codingteam.cttalk.models.{Message, Token}
 import ru.org.codingteam.cttalk.services.MessagesRepository
 
@@ -12,7 +13,7 @@ import scala.util.{Failure, Success}
 class SingleUserMessageReceiver(token: Token, messagesRepository: MessagesRepository) extends MessageReceiver {
 
   override def receive(message: Message): Future[Boolean] = {
-    messagesRepository.save(message) map { _ => true } recover { case _ => false }
+    Future.successful(true)
   }
 
   override def get(): Promise[Seq[Message]] = {

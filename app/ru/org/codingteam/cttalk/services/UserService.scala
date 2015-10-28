@@ -8,7 +8,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import ru.org.codingteam.cttalk.models.{Message, Token, User}
 import ru.org.codingteam.cttalk.services.messaging.MessageReceiver
 
-import scala.concurrent.Future
+import scala.concurrent.{Future, Promise}
 
 /**
  * Created by hgn on 20.10.2015.
@@ -35,7 +35,11 @@ class UserServiceImpl @Inject()(users: UserRepository, tokens: TokensRepository,
 
     val receiver = new MessageReceiver {
       //todo replace with something working
-      override def receive(message: Message): Boolean = true
+      override def receive(message: Message): Future[Boolean] = Future.successful(true)
+
+      override def get(): Promise[Seq[Message]] = {
+        Promise.successful(Seq())
+      }
     }
 
     users.getByNameAndPasswordHash(name, sentPasswordHash) flatMap {

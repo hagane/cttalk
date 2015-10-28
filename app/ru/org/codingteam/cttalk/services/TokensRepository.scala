@@ -9,7 +9,8 @@ import play.api.libs.json.{JsPath, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import play.modules.reactivemongo.json.ImplicitBSONHandlers._
 import play.modules.reactivemongo.json.collection.JSONCollection
-import ru.org.codingteam.cttalk.models.{Token, User}
+import ru.org.codingteam.cttalk.models.Handle._
+import ru.org.codingteam.cttalk.models.{Handle, Token, User, UserHandle}
 
 import scala.concurrent.Future
 import scala.util.Random
@@ -30,11 +31,11 @@ class TokensRepositoryImpl @Inject()(mongo: ReactiveMongoApi) extends TokensRepo
 
   implicit val reads =
     ((JsPath \ "_id").read[String] and
-        (JsPath \ "username").read[String])(Token.apply _)
+        (JsPath \ "handle").read[Handle])(Token.apply _)
 
   implicit val writes =
     ((JsPath \ "_id").write[String] and
-        (JsPath \ "username").write[String])(unlift(Token.unapply))
+        (JsPath \ "handle").write[Handle])(unlift(Token.unapply))
 
   override def get(id: String): Future[Option[Token]] = {
     tokens.find(Json.obj("_id" -> id)).one[Token]
@@ -42,13 +43,13 @@ class TokensRepositoryImpl @Inject()(mongo: ReactiveMongoApi) extends TokensRepo
 
   override def create(user: User): Future[Token] = {
     val nextId = Random.nextLong().toHexString //TODO replace this with injected secure-er generator
-    val token = Token(nextId, user.name)
+    val token = Token(nextId, UserHandle(user.name))
     tokens.insert(token) map { _ => token }
   }
 
   def tokens = mongo.db.collection[JSONCollection]("tokens")
 
   override def getAllRelated(token: Token): Future[Seq[Token]] = {
-    tokens.find(Json.obj("username" -> token.username)).cursor[Token]().collect[Seq]()
+    tokens.find(Json.obj("handle" -> Json.toJson(token.handle))).cursor[Token]().collect[Seq]()
   }
 }

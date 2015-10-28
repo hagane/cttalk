@@ -7,9 +7,6 @@ import play.api.test.PlaySpecification
  */
 class SingleUserMessageReceiverSpec extends PlaySpecification {
   "SingleUserMessageReceiver.receive" should {
-    "-- relay receved message to repository" in {
-      todo
-    }
 
     "-- trigger fulfillment of a promise from .get" in {
       todo

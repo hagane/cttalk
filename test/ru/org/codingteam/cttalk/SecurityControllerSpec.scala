@@ -6,7 +6,7 @@ import play.api.mvc.Result
 import play.api.test.{FakeApplication, FakeRequest, PlaySpecification}
 import reactivemongo.api.commands.WriteResult
 import ru.org.codingteam.cttalk.controllers.api.SecurityController
-import ru.org.codingteam.cttalk.models.{Token, User}
+import ru.org.codingteam.cttalk.models.{Token, User, UserHandle}
 import ru.org.codingteam.cttalk.services.UserService
 
 import scala.concurrent.Future
@@ -35,7 +35,7 @@ class SecurityControllerSpec extends PlaySpecification with Mockito {
 
     service.auth(anyString, anyString) answers { args =>
       args match {
-        case Array("existing", "correct") => Future.successful(Token("token", "existing"))
+        case Array("existing", "correct") => Future.successful(Token("token", UserHandle("existing")))
         case Array("existing", _) => Future.failed(new RuntimeException)
         case _ => Future.failed(new RuntimeException)
       }

@@ -10,7 +10,8 @@ import play.api.libs.json.{JsPath, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import play.modules.reactivemongo.json.ImplicitBSONHandlers._
 import play.modules.reactivemongo.json.collection.JSONCollection
-import ru.org.codingteam.cttalk.models.{Message, Token}
+import ru.org.codingteam.cttalk.models.Handle._
+import ru.org.codingteam.cttalk.models.{Handle, Message, Token}
 
 import scala.concurrent.Future
 
@@ -19,7 +20,7 @@ import scala.concurrent.Future
  */
 @ImplementedBy(classOf[MessagesRepositoryImpl])
 trait MessagesRepository {
-  def save(message: Message): Future[String]
+  def save(message: Message): Future[Message]
 
   def getUnreadFor(token: Token): Future[Seq[Message]]
 
@@ -31,20 +32,20 @@ trait MessagesRepository {
 class MessagesRepositoryImpl @Inject()(mongo: ReactiveMongoApi, tokens: TokensRepository) extends MessagesRepository {
 
   implicit val writes = ((JsPath \ "_id").write[String] and
-      (JsPath \ "sender").write[String] and
-      (JsPath \ "receiver").write[String] and
+      (JsPath \ "sender").write[Handle] and
+      (JsPath \ "receiver").write[Handle] and
       (JsPath \ "wasRead").write[Boolean] and
       (JsPath \ "moment").write[Date] and
-      (JsPath \ "text").write[String]) {m: Message => (m.id, m.senderToken, m.receiverToken, m.wasRead, m.moment, m.text)}
+      (JsPath \ "text").write[String]) {m: Message => (m.id, m.sender, m.receiver, m.wasRead, m.moment, m.text)}
 
-  implicit val reads = ((JsPath \ "sender").read[String] and
-      (JsPath \ "receiver").read[String] and
+  implicit val reads = ((JsPath \ "sender").read[Handle] and
+      (JsPath \ "receiver").read[Handle] and
       (JsPath \ "wasRead").read[Boolean] and
       (JsPath \ "moment").read[Date] and
       (JsPath \ "text").read[String]) (Message.apply _)
 
-  override def save(message: Message): Future[String] = {
-    messages.insert(message) map { _ => message.id }
+  override def save(message: Message): Future[Message] = {
+    messages.insert(message) map { _ => message }
   }
 
   override def getUnreadFor(token: Token): Future[Seq[Message]] = {
