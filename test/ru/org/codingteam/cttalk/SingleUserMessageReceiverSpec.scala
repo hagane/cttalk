@@ -1,29 +1,25 @@
 package ru.org.codingteam.cttalk
 
+import org.specs2.mock.Mockito
 import play.api.test.PlaySpecification
+import ru.org.codingteam.cttalk.models.{Message, Token}
+import ru.org.codingteam.cttalk.services.messaging.SingleUserMessageReceiver
 
 /**
  * Created by hgn on 28.10.2015.
  */
-class SingleUserMessageReceiverSpec extends PlaySpecification {
+class SingleUserMessageReceiverSpec extends PlaySpecification with Mockito {
   "SingleUserMessageReceiver.receive" should {
 
     "-- trigger fulfillment of a promise from .get" in {
-      todo
-    }
-  }
+      val receiver = new SingleUserMessageReceiver(mock[Token])
+      val promise = receiver.get()
 
-  "SingleUserMessageReceiver.get" should {
-    "-- return an eventually successfull promise if there are unread messages" in {
-      todo
-    }
+      promise.isCompleted mustEqual false
 
-    "-- return a promise that will be successfull after receiving a message" in {
-      todo
-    }
+      receiver.receive(mock[Message])
 
-    "-- return a promise that will be failed if call to repository was failed" in {
-      todo
+      promise.isCompleted mustEqual true
     }
   }
 }

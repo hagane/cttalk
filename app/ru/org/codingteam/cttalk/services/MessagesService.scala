@@ -27,12 +27,10 @@ class MessagesServiceImpl @Inject()(messages: MessagesRepository, tokens: Tokens
     messages.save(message) flatMap { message =>
       tokens.getByHandle(message.receiver) map { tokens =>
         tokens map { token =>
-          Option(receivers.replace(token, new SingleUserMessageReceiver(token, messages))) exists { receiver =>
+          Option(receivers.replace(token, new SingleUserMessageReceiver(token))) exists { receiver =>
             receiver.receive(message)
           }
-        } reduce {
-          _ || _
-        }
+        } reduce (_ || _)
       }
     }
   }
