@@ -11,7 +11,7 @@ import play.modules.reactivemongo.ReactiveMongoApi
 import play.modules.reactivemongo.json.ImplicitBSONHandlers._
 import play.modules.reactivemongo.json.collection.JSONCollection
 import ru.org.codingteam.cttalk.models.Handle._
-import ru.org.codingteam.cttalk.models.{Handle, Message, Token}
+import ru.org.codingteam.cttalk.models.{Handle, Message}
 
 import scala.concurrent.Future
 
@@ -22,9 +22,9 @@ import scala.concurrent.Future
 trait MessagesRepository {
   def save(message: Message): Future[Message]
 
-  def getUnreadFor(token: Token): Future[Seq[Message]]
+  def getUnread(handle: Handle): Future[Seq[Message]]
 
-  def getLastFor(token: Token, upTo: Int = Int.MaxValue): Future[Seq[Message]]
+  def getLast(sender: Handle, receiver: Handle, upTo: Int = Int.MaxValue): Future[Seq[Message]]
 
   def markRead(messageSeq: Seq[Message]): Future[Seq[Message]]
 }
@@ -48,21 +48,21 @@ class MessagesRepositoryImpl @Inject()(mongo: ReactiveMongoApi, tokens: TokensRe
     messages.insert(message) map { _ => message }
   }
 
-  override def getUnreadFor(token: Token): Future[Seq[Message]] = {
-    tokens.getAllRelated(token) flatMap { related =>
-      messages.find(Json.obj("receiver" -> Json.obj("$in" -> Json.toJson(related map {t => t._id})), "wasRead" -> false))
+  override def getUnread(handle: Handle): Future[Seq[Message]] = {
+    messages.find(Json.obj(
+        "receiver" -> Json.toJson(handle),
+        "wasRead" -> false))
       .cursor[Message]()
       .collect[Seq]()
     }
-  }
 
-  override def getLastFor(token: Token, upTo: Int = Int.MaxValue): Future[Seq[Message]] = {
-    tokens.getAllRelated(token) flatMap { related =>
-      messages.find(Json.obj("receiver" -> Json.obj("$in" -> Json.toJson(related map {t => t._id}))))
+  override def getLast(sender: Handle, receiver: Handle, upTo: Int = Int.MaxValue): Future[Seq[Message]] = {
+    messages.find(Json.obj(
+        "receiver" -> Json.toJson(receiver),
+        "sender" -> Json.toJson(sender)))
         .sort(Json.obj("moment" -> -1))
         .cursor[Message]()
         .collect[Seq](upTo)
-    }
   }
 
   def messages = mongo.db.collection[JSONCollection]("messages")

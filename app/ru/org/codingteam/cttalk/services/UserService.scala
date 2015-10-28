@@ -35,7 +35,7 @@ class UserServiceImpl @Inject()(users: UserRepository, tokens: TokensRepository,
 
     val receiver = new MessageReceiver {
       //todo replace with something working
-      override def receive(message: Message): Future[Boolean] = Future.successful(true)
+      override def receive(message: Message): Boolean = true
 
       override def get(): Promise[Seq[Message]] = {
         Promise.successful(Seq())

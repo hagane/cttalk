@@ -7,7 +7,7 @@ import org.specs2.mock.Mockito
 import play.api.test.PlaySpecification
 import ru.org.codingteam.cttalk.models.{Message, Token, UserHandle}
 import ru.org.codingteam.cttalk.services.messaging.MessageReceiver
-import ru.org.codingteam.cttalk.services.{MessagesRepository, MessagesServiceImpl}
+import ru.org.codingteam.cttalk.services.{MessagesRepository, MessagesServiceImpl, TokensRepository}
 
 import scala.concurrent.{Future, Promise}
 
@@ -29,9 +29,9 @@ class MessagesServiceSpec extends PlaySpecification with Mockito {
   private class MockReceiver extends MessageReceiver {
     private val list = List.newBuilder[Message]
 
-    override def receive(message: Message): Future[Boolean] = {
+    override def receive(message: Message): Boolean = {
       list += message
-      Future.successful(true)
+      true
     }
 
     def get(): Promise[Seq[Message]] = Promise.successful(list.result())
@@ -40,10 +40,14 @@ class MessagesServiceSpec extends PlaySpecification with Mockito {
   "MessageService.send" should {
     "-- save message in repository and succeed when sending to existing recipient" in { implicit ee: ExecutionEnv =>
       val repository = mockMessagesRepository
-      val service = new MessagesServiceImpl(repository)
+
       val token: Token = Token("existing", UserHandle("username"))
+      val mockTokens = mock[TokensRepository]
+      mockTokens.getByHandle(any[UserHandle]) returns Future.successful(Seq(token))
+
+      val service = new MessagesServiceImpl(repository, mockTokens)
       service.register(token, new MockReceiver)
-      service.send(UserHandle("existing"), Message(UserHandle("sender"), UserHandle("receiver"), wasRead = false, new Date, "message")) map {
+      service.send(Message(UserHandle("sender"), UserHandle("existing"), wasRead = false, new Date, "message")) map {
         result => result mustEqual true
       } await
 
@@ -51,9 +55,10 @@ class MessagesServiceSpec extends PlaySpecification with Mockito {
     }
 
     "-- fail when sending to unknown recipient" in { implicit ee: ExecutionEnv =>
-      val service = new MessagesServiceImpl(mockMessagesRepository)
-      val token: Token = Token("unknown", UserHandle("username"))
-      service.send(UserHandle("receiver"), Message(UserHandle("sender"), UserHandle("receiver"), wasRead = false, new Date, "message")) must throwA[Exception].await
+      val mockTokens = mock[TokensRepository]
+      mockTokens.getByHandle(any[UserHandle]) returns Future.successful(Seq())
+      val service = new MessagesServiceImpl(mockMessagesRepository, mockTokens)
+      service.send(Message(UserHandle("sender"), UserHandle("receiver"), wasRead = false, new Date, "message")) must throwA[Exception].await
     }
   }
 
@@ -63,7 +68,7 @@ class MessagesServiceSpec extends PlaySpecification with Mockito {
     }
 
     "-- fail if trying to register an already registered recipient" in { implicit ee: ExecutionEnv =>
-      val service = new MessagesServiceImpl(mockMessagesRepository)
+      val service = new MessagesServiceImpl(mockMessagesRepository, mock[TokensRepository])
       val token: Token = Token("receiver", UserHandle("username"))
       service.register(token, new MockReceiver) map { _ => success } await
 

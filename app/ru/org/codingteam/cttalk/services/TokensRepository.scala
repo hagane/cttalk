@@ -22,7 +22,7 @@ import scala.util.Random
 trait TokensRepository {
   def get(id: String): Future[Option[Token]]
 
-  def getAllRelated(token: Token): Future[Seq[Token]]
+  def getByHandle(handle: Handle): Future[Seq[Token]]
 
   def create(user: User): Future[Token]
 }
@@ -49,7 +49,7 @@ class TokensRepositoryImpl @Inject()(mongo: ReactiveMongoApi) extends TokensRepo
 
   def tokens = mongo.db.collection[JSONCollection]("tokens")
 
-  override def getAllRelated(token: Token): Future[Seq[Token]] = {
-    tokens.find(Json.obj("handle" -> Json.toJson(token.handle))).cursor[Token]().collect[Seq]()
+  override def getByHandle(handle: Handle): Future[Seq[Token]] = {
+    tokens.find(Json.obj("handle" -> Json.toJson(handle))).cursor[Token]().collect[Seq]()
   }
 }

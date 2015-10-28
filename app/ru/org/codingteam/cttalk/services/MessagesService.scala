@@ -5,8 +5,8 @@ import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
 import play.api.libs.concurrent.Execution.Implicits._
-import ru.org.codingteam.cttalk.models.{Handle, Message, Token}
-import ru.org.codingteam.cttalk.services.messaging.MessageReceiver
+import ru.org.codingteam.cttalk.models.{Message, Token}
+import ru.org.codingteam.cttalk.services.messaging.{MessageReceiver, SingleUserMessageReceiver}
 
 import scala.concurrent.Future
 
@@ -15,18 +15,26 @@ import scala.concurrent.Future
  */
 @ImplementedBy(classOf[MessagesServiceImpl])
 trait MessagesService {
-  def send(to: Handle, message: Message): Future[Boolean]
+  def send(message: Message): Future[Boolean]
 
   def register(token: Token, receiver: MessageReceiver): Future[Token]
 }
 
-class MessagesServiceImpl @Inject()(messages: MessagesRepository) extends MessagesService {
+class MessagesServiceImpl @Inject()(messages: MessagesRepository, tokens: TokensRepository) extends MessagesService {
   val receivers = new ConcurrentHashMap[Token, MessageReceiver]
 
-  override def send(to: Handle, message: Message): Future[Boolean] = {
-    Option(receivers.get(to)) map { receiver =>
-      messages.save(message) flatMap receiver.receive
-    } getOrElse Future.failed(new RuntimeException("token not registered"))
+  override def send(message: Message): Future[Boolean] = {
+    messages.save(message) flatMap { message =>
+      tokens.getByHandle(message.receiver) map { tokens =>
+        tokens map { token =>
+          Option(receivers.replace(token, new SingleUserMessageReceiver(token, messages))) exists { receiver =>
+            receiver.receive(message)
+          }
+        } reduce {
+          _ || _
+        }
+      }
+    }
   }
 
   override def register(token: Token, receiver: MessageReceiver): Future[Token] = {
