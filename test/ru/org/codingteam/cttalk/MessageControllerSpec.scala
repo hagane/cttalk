@@ -1,18 +1,20 @@
 package ru.org.codingteam.cttalk
 
+import org.specs2.mock.Mockito
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Cookie
 import play.api.test.{FakeApplication, FakeRequest, PlaySpecification}
 import ru.org.codingteam.cttalk.controllers.api.MessageController
+import ru.org.codingteam.cttalk.services.{MessagesService, TokensRepository}
 
 /**
  * Created by hgn on 29.10.2015.
  */
-class MessageControllerSpec extends PlaySpecification {
+class MessageControllerSpec extends PlaySpecification with Mockito {
   "MessageController.send" should {
     "-- return Ok when sending a proper message" in {
       running(FakeApplication()) {
-        val controller = new MessageController
+        val controller = new MessageController(mock[MessagesService], mock[TokensRepository])
         val eventualResponse = controller.send(FakeRequest().withJsonBody(
           Json.obj(
             "to" -> Json.obj(
@@ -28,7 +30,7 @@ class MessageControllerSpec extends PlaySpecification {
 
     "-- return Unauthorized when received an invalid token cookie" in {
       running(FakeApplication()) {
-        val controller = new MessageController
+        val controller = new MessageController(mock[MessagesService], mock[TokensRepository])
         val eventualResponse = controller.send(FakeRequest().withJsonBody(
           Json.obj(
             "to" -> Json.obj(
@@ -44,7 +46,7 @@ class MessageControllerSpec extends PlaySpecification {
 
     "-- return Unauthorized when received no token cookieat all" in {
       running(FakeApplication()) {
-        val controller = new MessageController
+        val controller = new MessageController(mock[MessagesService], mock[TokensRepository])
         val eventualResponse = controller.send(FakeRequest().withJsonBody(
           Json.obj(
             "to" -> Json.obj(
@@ -58,7 +60,7 @@ class MessageControllerSpec extends PlaySpecification {
 
     "-- return NotFound when received an unknown handle" in {
       running(FakeApplication()) {
-        val controller = new MessageController
+        val controller = new MessageController(mock[MessagesService], mock[TokensRepository])
         val eventualResponse = controller.send(FakeRequest().withJsonBody(
           Json.obj("to" -> Json.obj(
               "user" -> "unknown"
@@ -75,7 +77,7 @@ class MessageControllerSpec extends PlaySpecification {
   "MessageController.receive" should {
     "-- eventually return Ok if there are no new messages" in {
       running(FakeApplication()) {
-        val controller = new MessageController
+        val controller = new MessageController(mock[MessagesService], mock[TokensRepository])
         val eventualResponse = controller.send(FakeRequest().withCookies(
           Cookie("token", "valid")
         ))
@@ -85,7 +87,7 @@ class MessageControllerSpec extends PlaySpecification {
     }
 
     "-- eventually return a received message" in {
-      val controller = new MessageController
+      val controller = new MessageController(mock[MessagesService], mock[TokensRepository])
       controller.send(FakeRequest().withJsonBody(
         Json.obj(
           "to" -> Json.obj(
@@ -104,7 +106,7 @@ class MessageControllerSpec extends PlaySpecification {
     }
 
     "-- return Unauthorized when got an invalid token cookie" in {
-      val controller = new MessageController
+      val controller = new MessageController(mock[MessagesService], mock[TokensRepository])
 
       val eventualResponse = controller.send(FakeRequest().withCookies(
         Cookie("token", "invalid")
@@ -113,8 +115,8 @@ class MessageControllerSpec extends PlaySpecification {
       status(eventualResponse) mustEqual UNAUTHORIZED
     }
 
-    "-- return Unauthorized when got no token cookieat all" in {
-      val controller = new MessageController
+    "-- return Unauthorized when got no token cookie at all" in {
+      val controller = new MessageController(mock[MessagesService], mock[TokensRepository])
 
       val eventualResponse = controller.send(FakeRequest())
 
