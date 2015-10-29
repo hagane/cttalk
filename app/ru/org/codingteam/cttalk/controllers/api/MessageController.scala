@@ -3,7 +3,7 @@ package ru.org.codingteam.cttalk.controllers.api
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.mvc._
-import ru.org.codingteam.cttalk.models.Handle
+import ru.org.codingteam.cttalk.models.{Handle, ReceivedToken}
 
 import scala.concurrent.Future
 
@@ -16,13 +16,15 @@ class MessageController extends Controller with JsonRequest {
     (JsPath \ "text").read[String]
     ) tupled
 
-  implicit val receiveReads = (JsPath \ "token").read[String]
+  implicit val receiveReads = (JsPath \ "token").read[String].map {
+    ReceivedToken.apply
+  }
 
   def send = jsonAsync[(String, Handle, String)] {
     case _ => Future.successful(Ok)
   }
 
-  def receive = jsonAsync[String] {
+  def receive = jsonAsync[ReceivedToken] {
     case _ => Future.successful(Ok)
   }
 }
