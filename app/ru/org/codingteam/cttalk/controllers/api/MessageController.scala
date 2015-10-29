@@ -7,6 +7,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.mvc._
+import ru.org.codingteam.cttalk.models.Handle._
 import ru.org.codingteam.cttalk.models.{Handle, Message}
 import ru.org.codingteam.cttalk.services.{MessagesService, TokensRepository}
 
