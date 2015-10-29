@@ -67,7 +67,7 @@ class SecurityControllerSpec extends PlaySpecification with Mockito {
   }
 
   "SecurityController.auth" should {
-    "-- return OK(token) on successful auth" in {
+    "-- return OK with a cookie on successful auth" in {
       running(FakeApplication()) {
         val request = FakeRequest().withJsonBody(Json.obj(
           "name" -> "existing",
@@ -76,9 +76,10 @@ class SecurityControllerSpec extends PlaySpecification with Mockito {
         val controller = new SecurityController(mockUserService)
         val result: Future[Result] = controller.auth.apply(request)
         status(result) mustEqual OK
-        contentAsJson(result) mustEqual Json.obj("token" -> "token")
+        cookies(result).get("token") must not be empty
       }
     }
+
     "-- return Unauthorized if user is not found" in {
       running(FakeApplication()) {
         val request = FakeRequest().withJsonBody(Json.obj(

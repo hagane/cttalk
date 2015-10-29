@@ -5,7 +5,7 @@ import javax.inject.Inject
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import play.api.mvc.Controller
+import play.api.mvc.{Controller, Cookie}
 import ru.org.codingteam.cttalk.services.UserService
 
 /**
@@ -24,7 +24,7 @@ class SecurityController @Inject()(userService: UserService) extends Controller 
 
   def auth = httpsOnlyAsync(jsonAsync[(String, String)] {
     case (name, password) => userService.auth(name, password) map { token =>
-      Ok(Json.obj("token" -> token._id))
+      Ok.withCookies(Cookie("token", token._id))
     } recover {
       case _ => Unauthorized
     }

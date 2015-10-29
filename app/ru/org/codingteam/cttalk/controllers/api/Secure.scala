@@ -2,7 +2,6 @@ package ru.org.codingteam.cttalk.controllers.api
 
 import play.Play
 import play.api.mvc._
-import play.api.libs.concurrent.Execution.Implicits._
 
 import scala.concurrent.Future
 
@@ -25,5 +24,11 @@ trait Secure {
     } else {
       f(request)
     }
+  }
+
+  def withAuthCookie(cookieName: String)(f: Cookie => Request[AnyContent] => Future[Result]) = Action.async { implicit request =>
+    request.cookies.get(cookieName) map {
+      f(_)(request)
+    } getOrElse Future.successful(Results.Unauthorized)
   }
 }

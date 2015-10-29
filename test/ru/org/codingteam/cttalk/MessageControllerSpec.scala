@@ -1,6 +1,7 @@
 package ru.org.codingteam.cttalk
 
 import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.Cookie
 import play.api.test.{FakeApplication, FakeRequest, PlaySpecification}
 import ru.org.codingteam.cttalk.controllers.api.MessageController
 
@@ -14,22 +15,38 @@ class MessageControllerSpec extends PlaySpecification {
         val controller = new MessageController
         val eventualResponse = controller.send(FakeRequest().withJsonBody(
           Json.obj(
-            "token" -> "valid",
             "to" -> Json.obj(
               "user" -> "known"
             ),
-            "text" -> "message text")))
+            "text" -> "message text")).withCookies(
+          Cookie("token", "valid")
+        ))
 
         status(eventualResponse) mustEqual OK
       }
     }
 
-    "-- return Unauthorized when received an unknown token" in {
+    "-- return Unauthorized when received an invalid token cookie" in {
       running(FakeApplication()) {
         val controller = new MessageController
         val eventualResponse = controller.send(FakeRequest().withJsonBody(
           Json.obj(
-            "token" -> "invalid",
+            "to" -> Json.obj(
+              "user" -> "known"
+            ),
+            "text" -> "message text")).withCookies(
+          Cookie("token", "invalid")
+        ))
+
+        status(eventualResponse) mustEqual UNAUTHORIZED
+      }
+    }
+
+    "-- return Unauthorized when received no token cookieat all" in {
+      running(FakeApplication()) {
+        val controller = new MessageController
+        val eventualResponse = controller.send(FakeRequest().withJsonBody(
+          Json.obj(
             "to" -> Json.obj(
               "user" -> "known"
             ),
@@ -43,12 +60,12 @@ class MessageControllerSpec extends PlaySpecification {
       running(FakeApplication()) {
         val controller = new MessageController
         val eventualResponse = controller.send(FakeRequest().withJsonBody(
-          Json.obj(
-            "token" -> "valid",
-            "to" -> Json.obj(
+          Json.obj("to" -> Json.obj(
               "user" -> "unknown"
             ),
-            "text" -> "message text")))
+            "text" -> "message text")).withCookies(
+          Cookie("token", "valid")
+        ))
 
         status(eventualResponse) mustEqual NOT_FOUND
       }
@@ -59,8 +76,9 @@ class MessageControllerSpec extends PlaySpecification {
     "-- eventually return Ok if there are no new messages" in {
       running(FakeApplication()) {
         val controller = new MessageController
-        val eventualResponse = controller.send(FakeRequest().withJsonBody(
-          Json.obj("token" -> "valid")))
+        val eventualResponse = controller.send(FakeRequest().withCookies(
+          Cookie("token", "valid")
+        ))
 
         status(eventualResponse) mustEqual OK
       }
@@ -70,24 +88,35 @@ class MessageControllerSpec extends PlaySpecification {
       val controller = new MessageController
       controller.send(FakeRequest().withJsonBody(
         Json.obj(
-          "token" -> "valid",
           "to" -> Json.obj(
             "user" -> "known"
           ),
-          "text" -> "message text")))
+          "text" -> "message text")).withCookies(
+        Cookie("token", "valid")
+      ))
 
-      val eventualResponse = controller.send(FakeRequest().withJsonBody(
-        Json.obj("token" -> "valid")))
+      val eventualResponse = controller.send(FakeRequest().withCookies(
+        Cookie("token", "valid")
+      ))
 
       status(eventualResponse) mustEqual OK
       contentAsJson(eventualResponse) must beAnInstanceOf[JsValue]
     }
 
-    "-- return Unauthorized when got an unknown token" in {
+    "-- return Unauthorized when got an invalid token cookie" in {
       val controller = new MessageController
 
-      val eventualResponse = controller.send(FakeRequest().withJsonBody(
-        Json.obj("token" -> "invalid")))
+      val eventualResponse = controller.send(FakeRequest().withCookies(
+        Cookie("token", "invalid")
+      ))
+
+      status(eventualResponse) mustEqual UNAUTHORIZED
+    }
+
+    "-- return Unauthorized when got no token cookieat all" in {
+      val controller = new MessageController
+
+      val eventualResponse = controller.send(FakeRequest())
 
       status(eventualResponse) mustEqual UNAUTHORIZED
     }
