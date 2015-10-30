@@ -17,6 +17,8 @@ import scala.concurrent.Future
 trait MessagesService {
   def send(message: Message): Future[Boolean]
 
+  def get(token: Token): Future[Seq[Message]]
+
   def register(token: Token, receiver: MessageReceiver): Future[Token]
 }
 
@@ -39,6 +41,14 @@ class MessagesServiceImpl @Inject()(messages: MessagesRepository, tokens: Tokens
     Option(receivers.putIfAbsent(token, receiver)) match {
       case None => Future.successful(token)
       case Some(_) => Future.failed(new RuntimeException("token already present"))
+    }
+  }
+
+  override def get(token: Token): Future[Seq[Message]] = {
+    Option(receivers.get(token)) map {
+      _.get().future
+    } getOrElse {
+      Future.failed(new RuntimeException)
     }
   }
 }

@@ -5,7 +5,7 @@ import java.util.Date
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mock.Mockito
 import play.api.test.PlaySpecification
-import ru.org.codingteam.cttalk.models.{Message, Token, UserHandle}
+import ru.org.codingteam.cttalk.models.{Handle, Message, Token, UserHandle}
 import ru.org.codingteam.cttalk.services.messaging.MessageReceiver
 import ru.org.codingteam.cttalk.services.{MessagesRepository, MessagesServiceImpl, TokensRepository}
 
@@ -73,6 +73,55 @@ class MessagesServiceSpec extends PlaySpecification with Mockito {
       service.register(token, new MockReceiver) map { _ => success } await
 
       service.register(token, new MockReceiver) must throwA[Exception].await
+    }
+  }
+
+  "MessageService.get" should {
+    "-- eventually return empty Seq if there are no new messages" in { implicit ee: ExecutionEnv =>
+      val mockTokens = mock[TokensRepository]
+
+      val token = Token("valid", UserHandle("user"))
+      mockTokens.getByHandle(any[Handle]) returns Future.successful(Seq(token))
+      val service = new MessagesServiceImpl(mock[MessagesRepository], mockTokens)
+
+      val receiver = new MockReceiver
+
+      service.register(token, receiver)
+      service.get(Token("valid", UserHandle("user"))) map {
+        case Seq() => success
+        case _ => failure("not an empty Seg")
+      } await
+    }
+
+    "-- eventually return a Seq of received messages" in { implicit ee: ExecutionEnv =>
+      val mockTokens = mock[TokensRepository]
+
+      val token = Token("valid", UserHandle("user"))
+      mockTokens.getByHandle(any[Handle]) returns Future.successful(Seq(token))
+      val service = new MessagesServiceImpl(mock[MessagesRepository], mockTokens)
+
+      val receiver = new MockReceiver
+      receiver.receive(mock[Message])
+
+      service.register(token, receiver)
+      service.get(Token("valid", UserHandle("user"))) map {
+        case Seq() => failure("empty seq")
+        case Seq(_) => success
+        case _ => failure("not a Seg")
+      } await
+    }
+
+    "-- eventually fail if got an unknown handle" in { implicit ee: ExecutionEnv =>
+      val mockTokens = mock[TokensRepository]
+
+      val token = Token("valid", UserHandle("user"))
+      mockTokens.getByHandle(any[Handle]) returns Future.successful(Seq())
+      val service = new MessagesServiceImpl(mock[MessagesRepository], mockTokens)
+
+      val receiver = new MockReceiver
+
+      service.register(token, receiver)
+      service.get(Token("invalid", UserHandle("user"))) must throwA[RuntimeException].await
     }
   }
 }

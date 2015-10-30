@@ -5,4 +5,7 @@ GET /api/unread/:token      @ru.org.codingteam.cttalk.controllers.api.ChatContro
 
 POST /api/register          @ru.org.codingteam.cttalk.controllers.api.SecurityController.register
 
+POST /api/send              @ru.org.codingteam.cttalk.controllers.api.MessageController.send
+GET /api/receive            @ru.org.codingteam.cttalk.controllers.api.MessageController.receive
+
 GET /js/*file   controllers.Assets.at(path="/public/js", file)
