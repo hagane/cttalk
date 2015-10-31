@@ -1,5 +1,21 @@
 var app = angular.module('chat', []);
 
+app.service('MessageController', function($scope, $http) {
+    this.send = function (to, message) {
+        var data = {
+            "to" : to
+            "message" : message
+        }
+        $http.post("/api/send", data).then(function success(response) {
+        },
+        function error(response) {
+        })
+    }
+
+    this.receive = function() {
+    }
+})
+
 app.service('ChatService', function () {
     var chats = {}
     var onSelectListeners = []
@@ -61,17 +77,12 @@ app.controller('RosterController', function ($scope, $http, ChatService) {
     $scope.chats = ChatService.getChats()
 
     function getUnreadMessages(token) {
-        var req = $http.get("/api/unread/"+token)
-            req.success(
+        var req = $http.get("/api/receive").then(
                 function(data, status, headers, config) {
                     ChatService.unread(token, data)
-                }
-            )
-            req.error(
-                function(data, status, headers, config) {
+                }, function(data, status, headers, config) {
                     console.log("Failed updating chat [%s]: %s", chat.token, status)
-                }
-            )
+                })
     }
 
     var req = $http.get("/api/chats")
@@ -103,13 +114,14 @@ app.controller('ChatboxController', function ($scope, $http, ChatService) {
             $scope.chat.messages.push({"sender" : chatbox.sender, "text" : chatbox.text})
             chatbox.text = ""
 
-            var message = {
-                "token" : $scope.chat.token,
-                "sender" : chatbox.sender,
-                "text" : chatbox.text
+            var data = {
+                "to" : {"user" : $scope.chat.name}
+                "message" : message
             }
-            var req = $http.post("/api/send", message)
-            req.success(function(data, status, headers, config) {})
+            $http.post("/api/send", data).then(function success(response) {
+            },
+            function error(response) {
+            })
         }
     }
 });
