@@ -1,8 +1,7 @@
 package ru.org.codingteam.cttalk.controllers
 
-import ru.org.codingteam.cttalk._
-
 import play.api.mvc._
+import ru.org.codingteam.cttalk._
 
 /**
  * Created by hgn on 01.06.2015.

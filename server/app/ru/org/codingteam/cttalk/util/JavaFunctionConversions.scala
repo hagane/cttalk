@@ -1,6 +1,6 @@
 package ru.org.codingteam.cttalk.util
 
-import java.util.function.{ Function => JFunction }
+import java.util.function.{Function => JFunction}
 
 /**
  * Created by hgn on 25.10.2015.

@@ -1,5 +1,6 @@
 .idea/
 target/
+server/target/
 project/project
 project/target
 logs/

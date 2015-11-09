@@ -1,6 +1,6 @@
 package ru.org.codingteam.cttalk.controllers.api
 
-import play.api.libs.json.{Reads, JsError}
+import play.api.libs.json.{JsError, Reads}
 import play.api.mvc._
 
 import scala.concurrent.Future

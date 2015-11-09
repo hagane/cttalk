@@ -1,7 +1,7 @@
 package ru.org.codingteam.cttalk.controllers.api
 
-import play.api.mvc._
 import play.api.libs.json._
+import play.api.mvc._
 
 import scala.util.Random
 

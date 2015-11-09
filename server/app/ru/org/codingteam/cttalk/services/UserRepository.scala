@@ -34,6 +34,8 @@ class UserRepositoryImpl @Inject()(mongo: ReactiveMongoApi) extends UserReposito
     users.find(Json.obj("name" -> name, "passwordHash" -> passwordHash)).one[User]
   }
 
+  def users: JSONCollection = mongo.db.collection[JSONCollection]("users")
+
   override def getByToken(token: Token): Future[Option[User]] = {
     token.handle match {
       case UserHandle(username) => users.find(Json.obj("name" -> username)).one[User]
@@ -49,6 +51,4 @@ class UserRepositoryImpl @Inject()(mongo: ReactiveMongoApi) extends UserReposito
     )
     users.insert(jsonUser) map { _ => user }
   }
-
-  def users: JSONCollection = mongo.db.collection[JSONCollection]("users")
 }

@@ -1,4 +1,4 @@
-GET /   ru.org.codingteam.cttalk.controllers.MainController.index
+GET /   @ru.org.codingteam.cttalk.controllers.MainController.index
 
 GET /api/chats              @ru.org.codingteam.cttalk.controllers.api.ChatController.chats
 GET /api/unread/:token      @ru.org.codingteam.cttalk.controllers.api.ChatController.unread(token)
