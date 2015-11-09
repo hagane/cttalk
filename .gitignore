@@ -1,6 +1,7 @@
 .idea/
 target/
 server/target/
+client/target/
 project/project
 project/target
 logs/

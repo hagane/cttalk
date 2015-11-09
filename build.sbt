@@ -1,4 +1,3 @@
-import org.scalajs.sbtplugin.ScalaJSPlugin.AutoImport._
 import sbt.Project.projectToRef
 name := "ct-talk"
 
