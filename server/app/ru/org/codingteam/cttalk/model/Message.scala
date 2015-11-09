@@ -1,4 +1,4 @@
-package ru.org.codingteam.cttalk.models
+package ru.org.codingteam.cttalk.model
 
 import java.util.Date
 

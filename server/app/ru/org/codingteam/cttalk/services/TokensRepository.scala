@@ -9,8 +9,8 @@ import play.api.libs.json.{JsPath, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import play.modules.reactivemongo.json.ImplicitBSONHandlers._
 import play.modules.reactivemongo.json.collection.JSONCollection
-import ru.org.codingteam.cttalk.models.Handle._
-import ru.org.codingteam.cttalk.models.{Handle, Token, User, UserHandle}
+import ru.org.codingteam.cttalk.model.Handle._
+import ru.org.codingteam.cttalk.model.{Handle, Token, User, UserHandle}
 
 import scala.concurrent.Future
 import scala.util.Random
@@ -41,13 +41,13 @@ class TokensRepositoryImpl @Inject()(mongo: ReactiveMongoApi) extends TokensRepo
     tokens.find(Json.obj("_id" -> id)).one[Token]
   }
 
+  def tokens = mongo.db.collection[JSONCollection]("tokens")
+
   override def create(user: User): Future[Token] = {
     val nextId = Random.nextLong().toHexString //TODO replace this with injected secure-er generator
     val token = Token(nextId, UserHandle(user.name))
     tokens.insert(token) map { _ => token }
   }
-
-  def tokens = mongo.db.collection[JSONCollection]("tokens")
 
   override def getByHandle(handle: Handle): Future[Seq[Token]] = {
     tokens.find(Json.obj("handle" -> Json.toJson(handle))).cursor[Token]().collect[Seq]()

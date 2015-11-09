@@ -6,7 +6,7 @@ import play.api.mvc.Result
 import play.api.test.{FakeApplication, FakeRequest, PlaySpecification}
 import reactivemongo.api.commands.WriteResult
 import ru.org.codingteam.cttalk.controllers.api.SecurityController
-import ru.org.codingteam.cttalk.models.{Token, User, UserHandle}
+import ru.org.codingteam.cttalk.model.{Token, User, UserHandle}
 import ru.org.codingteam.cttalk.services.UserService
 
 import scala.concurrent.Future

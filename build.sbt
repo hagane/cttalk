@@ -22,9 +22,11 @@ lazy val client = (project in file("client")).settings(
   persistLauncher in Test := false,
   libraryDependencies ++= Seq(
     "org.scala-js" %%% "scalajs-dom" % "0.8.0",
-    "com.greencatsoft" %%% "scalajs-angular" % "0.6"
+    "com.greencatsoft" %%% "scalajs-angular" % "0.6",
+    "com.github.benhutchison" %%% "prickle" % "1.1.9"
   ),
-  jsDependencies += "org.webjars" % "angularjs" % "1.3.14" / "angular.js"
+  jsDependencies += "org.webjars" % "angularjs" % "1.3.14" / "angular.js",
+  skip in packageJSDependencies := false
 ).enablePlugins(ScalaJSPlugin, ScalaJSPlay)
 
 // loads the Play project at sbt startup

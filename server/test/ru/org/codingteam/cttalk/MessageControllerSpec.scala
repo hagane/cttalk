@@ -7,7 +7,7 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Cookie
 import play.api.test.{FakeApplication, FakeRequest, PlaySpecification}
 import ru.org.codingteam.cttalk.controllers.api.MessageController
-import ru.org.codingteam.cttalk.models.{Handle, Message, Token, UserHandle}
+import ru.org.codingteam.cttalk.model.{Handle, Message, Token, UserHandle}
 import ru.org.codingteam.cttalk.services.{MessagesService, TokensRepository}
 
 import scala.concurrent.Future

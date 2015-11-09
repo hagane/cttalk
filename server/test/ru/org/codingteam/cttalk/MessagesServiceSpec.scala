@@ -5,7 +5,7 @@ import java.util.Date
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mock.Mockito
 import play.api.test.PlaySpecification
-import ru.org.codingteam.cttalk.models.{Handle, Message, Token, UserHandle}
+import ru.org.codingteam.cttalk.model.{Handle, Message, Token, UserHandle}
 import ru.org.codingteam.cttalk.services.messaging.MessageReceiver
 import ru.org.codingteam.cttalk.services.{MessagesRepository, MessagesServiceImpl, TokensRepository}
 

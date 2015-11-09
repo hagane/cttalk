@@ -6,7 +6,7 @@ import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mock._
 import play.api.test.PlaySpecification
 import reactivemongo.api.commands.WriteResult
-import ru.org.codingteam.cttalk.models.{Token, User, UserHandle}
+import ru.org.codingteam.cttalk.model.{Token, User, UserHandle}
 import ru.org.codingteam.cttalk.services.messaging.MessageReceiver
 import ru.org.codingteam.cttalk.services.{MessagesService, TokensRepository, UserRepository, UserServiceImpl}
 

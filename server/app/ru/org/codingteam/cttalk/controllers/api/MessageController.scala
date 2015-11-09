@@ -7,8 +7,8 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.mvc._
-import ru.org.codingteam.cttalk.models.Handle._
-import ru.org.codingteam.cttalk.models.{Handle, Message}
+import ru.org.codingteam.cttalk.model.Handle._
+import ru.org.codingteam.cttalk.model.{Handle, Message}
 import ru.org.codingteam.cttalk.services.{MessagesService, TokensRepository}
 
 import scala.concurrent.Future
@@ -21,12 +21,11 @@ class MessageController @Inject()(messages: MessagesService, tokens: TokensRepos
     (JsPath \ "text").read[String]
     ) tupled
 
-  implicit val receiveWrites = ((JsPath \ "_id").write[String] and
-      (JsPath \ "sender").write[Handle] and
+  implicit val receiveWrites = ((JsPath \ "sender").write[Handle] and
       (JsPath \ "receiver").write[Handle] and
       (JsPath \ "wasRead").write[Boolean] and
       (JsPath \ "moment").write[Date] and
-      (JsPath \ "text").write[String]) {m: Message => (m.id, m.sender, m.receiver, m.wasRead, m.moment, m.text)}
+      (JsPath \ "text").write[String]) {m: Message => (m.sender, m.receiver, m.wasRead, m.moment, m.text)}
 
   def send = withAuthCookie("token")(cookie => jsonAsync[(Handle, String)] {
     case (receiver, text) => tokens.get(cookie.value) flatMap {

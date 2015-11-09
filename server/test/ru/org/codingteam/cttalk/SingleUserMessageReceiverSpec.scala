@@ -2,7 +2,7 @@ package ru.org.codingteam.cttalk
 
 import org.specs2.mock.Mockito
 import play.api.test.PlaySpecification
-import ru.org.codingteam.cttalk.models.{Message, Token}
+import ru.org.codingteam.cttalk.model.{Message, Token}
 import ru.org.codingteam.cttalk.services.messaging.SingleUserMessageReceiver
 
 /**

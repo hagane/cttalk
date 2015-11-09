@@ -5,7 +5,7 @@ import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
 import play.api.libs.concurrent.Execution.Implicits._
-import ru.org.codingteam.cttalk.models.{Message, Token, User}
+import ru.org.codingteam.cttalk.model.{Message, Token, User}
 import ru.org.codingteam.cttalk.services.messaging.MessageReceiver
 
 import scala.concurrent.{Future, Promise}

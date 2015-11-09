@@ -10,8 +10,8 @@ import play.api.libs.json.{JsPath, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import play.modules.reactivemongo.json.ImplicitBSONHandlers._
 import play.modules.reactivemongo.json.collection.JSONCollection
-import ru.org.codingteam.cttalk.models.Handle._
-import ru.org.codingteam.cttalk.models.{Handle, Message}
+import ru.org.codingteam.cttalk.model.Handle._
+import ru.org.codingteam.cttalk.model.{Handle, Message}
 
 import scala.concurrent.Future
 
@@ -48,6 +48,8 @@ class MessagesRepositoryImpl @Inject()(mongo: ReactiveMongoApi, tokens: TokensRe
     messages.insert(message) map { _ => message }
   }
 
+  def messages = mongo.db.collection[JSONCollection]("messages")
+
   override def getUnread(handle: Handle): Future[Seq[Message]] = {
     messages.find(Json.obj(
         "receiver" -> Json.toJson(handle),
@@ -64,8 +66,6 @@ class MessagesRepositoryImpl @Inject()(mongo: ReactiveMongoApi, tokens: TokensRe
         .cursor[Message]()
         .collect[Seq](upTo)
   }
-
-  def messages = mongo.db.collection[JSONCollection]("messages")
 
   override def markRead(messageSeq: Seq[Message]): Future[Seq[Message]] = {
     messages.update(Json.obj("_id" -> Json.toJson(messageSeq map { message => message.id })),

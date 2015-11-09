@@ -9,7 +9,7 @@ import play.api.libs.json.{JsPath, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import play.modules.reactivemongo.json._
 import play.modules.reactivemongo.json.collection.JSONCollection
-import ru.org.codingteam.cttalk.models.{Token, User, UserHandle}
+import ru.org.codingteam.cttalk.model.{Token, User, UserHandle}
 
 import scala.concurrent.Future
 
@@ -34,14 +34,14 @@ class UserRepositoryImpl @Inject()(mongo: ReactiveMongoApi) extends UserReposito
     users.find(Json.obj("name" -> name, "passwordHash" -> passwordHash)).one[User]
   }
 
-  def users: JSONCollection = mongo.db.collection[JSONCollection]("users")
-
   override def getByToken(token: Token): Future[Option[User]] = {
     token.handle match {
       case UserHandle(username) => users.find(Json.obj("name" -> username)).one[User]
       case _ => Future.failed(new RuntimeException("invalid token"))
     }
   }
+
+  def users: JSONCollection = mongo.db.collection[JSONCollection]("users")
 
   override def save(user: User): Future[User] = {
     val jsonUser = Json.obj(

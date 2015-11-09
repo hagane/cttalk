@@ -1,6 +1,6 @@
 package ru.org.codingteam.cttalk.services.messaging
 
-import ru.org.codingteam.cttalk.models.{Message, Token}
+import ru.org.codingteam.cttalk.model.{Message, Token}
 
 import scala.concurrent.Promise
 
