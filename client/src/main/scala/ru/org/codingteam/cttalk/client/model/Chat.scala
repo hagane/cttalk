@@ -7,9 +7,9 @@ import scala.scalajs.js.annotation.JSExportAll
  * Created by hgn on 21.11.2015.
  */
 @JSExportAll
-case class Chat(handle: Handle, name: String, var messages: js.Array[ReceivedMessage]) {
+case class Chat(var handle: Handle, var name: String, var messages: js.Array[ReceivedMessage]) {
 
-  def unread = messages.filter {
+  var unread = messages.filter {
     !_.wasRead
   }.length
 

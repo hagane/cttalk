@@ -13,8 +13,8 @@ class ChatController extends Controller {
   def chats = Action {
     val chats = Json.arr(
       Json.obj(
+        "handle" -> Json.obj("user" -> "ct"),
         "name" -> "Codingteam",
-        "token" -> "ct",
         "messages" -> Json.arr()
       )
     )

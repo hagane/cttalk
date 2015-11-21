@@ -12,4 +12,7 @@ import scala.scalajs.js
 trait ChatScope extends Scope {
   var chats: js.Array[Chat] = js.native
   var selected: Chat = js.native
+
+  var sender: String = js.native
+  var text: String = js.native
 }

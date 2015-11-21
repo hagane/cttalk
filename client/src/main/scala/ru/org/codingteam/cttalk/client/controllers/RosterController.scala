@@ -5,6 +5,7 @@ import com.greencatsoft.angularjs.{AbstractController, injectable}
 import org.scalajs.dom.console
 import ru.org.codingteam.cttalk.client.ChatScope
 import ru.org.codingteam.cttalk.client.model.Chat
+import ru.org.codingteam.cttalk.client.services.MessageService
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import scala.scalajs.js
@@ -16,19 +17,18 @@ import scala.util.{Failure, Success}
  */
 @JSExport
 @injectable("RosterController")
-class RosterController(scope: ChatScope, $http: HttpService) extends AbstractController[ChatScope](scope) {
+class RosterController(scope: ChatScope, $http: HttpService, messages: MessageService) extends AbstractController[ChatScope](scope) {
 
   $http.get[js.Array[Chat]]("/api/chats").onComplete {
     case Success(chats) => scope.chats = chats
-    case Failure(reason) => console.log("Error while getting chats.")
+    case Failure(reason) => console.error("Error while getting chats.")
   }
 
   @JSExport
   def select(chat: Chat): Unit = {
     scope.selected = chat
-    chat.messages.foreach {
+    scope.selected.messages.foreach {
       _.wasRead = true
     }
   }
-
 }
