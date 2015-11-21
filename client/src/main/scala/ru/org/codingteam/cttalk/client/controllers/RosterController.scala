@@ -6,9 +6,11 @@ import org.scalajs.dom.console
 import ru.org.codingteam.cttalk.client.ChatScope
 import ru.org.codingteam.cttalk.client.model.Chat
 import ru.org.codingteam.cttalk.client.services.MessageService
+import upickle.default._
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import scala.scalajs.js
+import scala.scalajs.js.JSON
 import scala.scalajs.js.annotation.JSExport
 import scala.util.{Failure, Success}
 
@@ -19,8 +21,10 @@ import scala.util.{Failure, Success}
 @injectable("RosterController")
 class RosterController(scope: ChatScope, $http: HttpService, messages: MessageService) extends AbstractController[ChatScope](scope) {
 
-  $http.get[js.Array[Chat]]("/api/chats").onComplete {
-    case Success(chats) => scope.chats = chats
+  $http.get[js.Array[js.Any]]("/api/chats").onComplete {
+    case Success(chats) => scope.chats = chats.map {
+      JSON.stringify(_)
+    } map read[Chat]
     case Failure(reason) => console.error("Error while getting chats.")
   }
 
