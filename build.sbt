@@ -10,11 +10,13 @@ lazy val server = (project in file("server")).settings(
   scalaJSProjects := Seq(client),
   pipelineStages := Seq(scalaJSProd),
   libraryDependencies ++= Seq(
+    "com.vmunier" %% "play-scalajs-scripts" % "0.3.0",
     "org.reactivemongo" %% "play2-reactivemongo" % "0.11.7.play24",
     specs2 % Test
   )
 ).enablePlugins(PlayScala)
   .aggregate(projectToRef(client))
+  .dependsOn(client)
 
 lazy val client = (project in file("client")).settings(
   scalaVersion := "2.11.7",

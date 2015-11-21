@@ -8,4 +8,4 @@ POST /api/register          @ru.org.codingteam.cttalk.controllers.api.SecurityCo
 POST /api/send              @ru.org.codingteam.cttalk.controllers.api.MessageController.send
 GET /api/receive            @ru.org.codingteam.cttalk.controllers.api.MessageController.receive
 
-GET /js/*file   controllers.Assets.at(path="/public/js", file)
+GET /assets/*file           controllers.Assets.at(path="/public", file)
