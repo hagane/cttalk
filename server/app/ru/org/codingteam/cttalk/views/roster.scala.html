@@ -1,8 +1,9 @@
 @()
 <div class="well" ng-controller="RosterController as roster">
     <ul class="nav nav-pills nav-stacked">
-        <li ng-repeat="(token, chat) in chats" ng-class="{active: chat.selected}">
-            <a ng-click="select(chat)">{{chat.name}} <span ng-show="chat.unread > 0" class="badge">{{chat.unread}}</span></a>
+        <li ng-repeat="chat in chats" ng-class="{active: chat.selected}">
+            <a ng-click="select(chat)">{{chat.name}} <span ng-show="chat.unread() > 0"
+                                                           class="badge">{{chat.unread()}}</span></a>
         </li>
     </ul>
 </div>

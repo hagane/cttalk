@@ -1,6 +1,7 @@
 package ru.org.codingteam.cttalk.client
 
 import com.greencatsoft.angularjs.Angular
+import ru.org.codingteam.cttalk.client.controllers.RosterController
 import ru.org.codingteam.cttalk.client.services.MessageServiceFactory
 
 import scala.scalajs.js.JSApp
@@ -14,5 +15,6 @@ object ClientApp extends JSApp {
   override def main(): Unit = {
     Angular.module("cttalk")
       .factory[MessageServiceFactory]
+      .controller[RosterController]
   }
 }
