@@ -15,7 +15,7 @@ import scala.scalajs.js.JSON
 /**
  * Created by hgn on 10.11.2015.
  */
-@injectable("messageService")
+@injectable("MessageService")
 class MessageService(http: HttpService) extends Service {
   require(http != null, s"No http service supplied.")
 
@@ -24,13 +24,13 @@ class MessageService(http: HttpService) extends Service {
   }
 
   def receive(): Future[ReceivedMessage] = {
-    http.get[js.Any]("/api/receive")
+    http.get[js.Any](s"/api/receive")
       .map(JSON.stringify(_))
       .map(read[ReceivedMessage])
   }
 }
 
-@injectable("messageService")
+@injectable("MessageService")
 class MessageServiceFactory(http: HttpService) extends Factory[MessageService] {
   override def apply(): MessageService = new MessageService(http)
 }

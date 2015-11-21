@@ -1,8 +1,8 @@
 @()
 <div class="panel panel-default" ng-controller="ChatboxController">
-    <div class="panel-heading">{{$scope.selected.name}}</div>
+    <div class="panel-heading">{{chat.name}}</div>
     <div class="panel-body">
-        <div ng-repeat="message in $scope.selected.messages">
+        <div ng-repeat="message in chat.messages">
             <b>{{message.sender}}</b>: {{message.text}}
         </div>
     </div>

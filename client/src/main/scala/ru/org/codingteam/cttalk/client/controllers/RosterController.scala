@@ -1,16 +1,12 @@
 package ru.org.codingteam.cttalk.client.controllers
 
-import com.greencatsoft.angularjs.core.HttpService
 import com.greencatsoft.angularjs.{AbstractController, injectable}
 import org.scalajs.dom.console
-import ru.org.codingteam.cttalk.client.ChatScope
+import ru.org.codingteam.cttalk.client.RosterScope
 import ru.org.codingteam.cttalk.client.model.Chat
-import ru.org.codingteam.cttalk.client.services.MessageService
-import upickle.default._
+import ru.org.codingteam.cttalk.client.services.{ChatService, MessageService}
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import scala.scalajs.js
-import scala.scalajs.js.JSON
 import scala.scalajs.js.annotation.JSExport
 import scala.util.{Failure, Success}
 
@@ -19,20 +15,20 @@ import scala.util.{Failure, Success}
  */
 @JSExport
 @injectable("RosterController")
-class RosterController(scope: ChatScope, $http: HttpService, messages: MessageService) extends AbstractController[ChatScope](scope) {
+class RosterController(scope: RosterScope, chats: ChatService, messages: MessageService) extends AbstractController[RosterScope](scope) {
 
-  $http.get[js.Array[js.Any]]("/api/chats").onComplete {
-    case Success(chats) => scope.chats = chats.map {
-      JSON.stringify(_)
-    } map read[Chat]
-    case Failure(reason) => console.error("Error while getting chats.")
+  chats.getChats.onComplete {
+    case Success(array) => scope.chats = array
+    case Failure(error) => handleError(error)
   }
 
   @JSExport
   def select(chat: Chat): Unit = {
     scope.selected = chat
-    scope.selected.messages.foreach {
-      _.wasRead = true
-    }
+    chats.select(chat)
+  }
+
+  def handleError(error: Throwable): Unit = {
+    console.error(s"Error while getting chats: $error")
   }
 }

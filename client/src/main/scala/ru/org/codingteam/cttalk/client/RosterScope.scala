@@ -9,10 +9,7 @@ import scala.scalajs.js
  * Created by hgn on 21.11.2015.
  */
 @js.native
-trait ChatScope extends Scope {
+trait RosterScope extends Scope {
   var chats: js.Array[Chat] = js.native
   var selected: Chat = js.native
-
-  var sender: String = js.native
-  var text: String = js.native
 }
