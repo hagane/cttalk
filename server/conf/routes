@@ -1,9 +1,11 @@
 GET /   @ru.org.codingteam.cttalk.controllers.MainController.index
+GET /auth   @ru.org.codingteam.cttalk.controllers.AuthenticationController.main
 
 GET /api/chats              @ru.org.codingteam.cttalk.controllers.api.ChatController.chats
 GET /api/unread/:token      @ru.org.codingteam.cttalk.controllers.api.ChatController.unread(token)
 
 POST /api/register          @ru.org.codingteam.cttalk.controllers.api.SecurityController.register
+POST /api/auth              @ru.org.codingteam.cttalk.controllers.api.SecurityController.auth
 
 POST /api/send              @ru.org.codingteam.cttalk.controllers.api.MessageController.send
 GET /api/receive            @ru.org.codingteam.cttalk.controllers.api.MessageController.receive

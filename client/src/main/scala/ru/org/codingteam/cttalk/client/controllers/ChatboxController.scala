@@ -13,7 +13,8 @@ import scala.scalajs.js.annotation.JSExport
  */
 @JSExport
 @injectable("ChatboxController")
-class ChatboxController(scope: ChatboxScope, chats: ChatService, messages: MessageService) extends AbstractController[ChatboxScope](scope) {
+class ChatboxController(scope: ChatboxScope, chats: ChatService, messages: MessageService)
+  extends AbstractController[ChatboxScope](scope) {
   require(messages != null, s"No MessageServiceSupplied")
 
   chats.onSelect {

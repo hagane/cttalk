@@ -15,7 +15,8 @@ import scala.util.{Failure, Success}
  */
 @JSExport
 @injectable("RosterController")
-class RosterController(scope: RosterScope, chats: ChatService, messages: MessageService) extends AbstractController[RosterScope](scope) {
+class RosterController(scope: RosterScope, chats: ChatService, messages: MessageService)
+  extends AbstractController[RosterScope](scope) {
 
   chats.getChats.onComplete {
     case Success(array) => scope.chats = array
