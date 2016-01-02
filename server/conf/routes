@@ -7,6 +7,7 @@ GET /api/unread/:token      @ru.org.codingteam.cttalk.controllers.api.ChatContro
 
 POST /api/register          @ru.org.codingteam.cttalk.controllers.api.SecurityController.register
 POST /api/auth              @ru.org.codingteam.cttalk.controllers.api.SecurityController.auth
+GET /api/self               @ru.org.codingteam.cttalk.controllers.api.SecurityController.self
 
 POST /api/send              @ru.org.codingteam.cttalk.controllers.api.MessageController.send
 GET /api/receive            @ru.org.codingteam.cttalk.controllers.api.MessageController.receive

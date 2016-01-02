@@ -6,12 +6,13 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.mvc.{Controller, Cookie}
-import ru.org.codingteam.cttalk.services.UserService
+import ru.org.codingteam.cttalk.model.Handle._
+import ru.org.codingteam.cttalk.services.{TokensRepository, UserService}
 
 /**
  * Created by hgn on 20.10.2015.
  */
-class SecurityController @Inject()(userService: UserService) extends Controller with Secure with JsonRequest {
+class SecurityController @Inject()(userService: UserService, tokensRepository: TokensRepository) extends Controller with Secure with JsonRequest {
 
   implicit val reads = (JsPath \ 'name).read[String] and
     (JsPath \ 'password).read[String] tupled
@@ -29,4 +30,12 @@ class SecurityController @Inject()(userService: UserService) extends Controller 
       case _ => Unauthorized
     }
   })
+
+  def self = withAuthCookie("token") { cookie => { _ =>
+    tokensRepository.get(cookie.value) map {
+      case Some(token) => Ok(Json.toJson(token.handle))
+      case None => Unauthorized
+    }
+  }
+  }
 }

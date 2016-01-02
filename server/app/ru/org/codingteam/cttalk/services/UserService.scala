@@ -5,10 +5,10 @@ import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
 import play.api.libs.concurrent.Execution.Implicits._
-import ru.org.codingteam.cttalk.model.{Message, Token, User}
-import ru.org.codingteam.cttalk.services.messaging.MessageReceiver
+import ru.org.codingteam.cttalk.model.{Token, User}
+import ru.org.codingteam.cttalk.services.messaging.SingleUserMessageReceiver
 
-import scala.concurrent.{Future, Promise}
+import scala.concurrent.Future
 
 /**
  * Created by hgn on 20.10.2015.
@@ -33,19 +33,10 @@ class UserServiceImpl @Inject()(users: UserRepository, tokens: TokensRepository,
     val digest: MessageDigest = MessageDigest.getInstance("SHA-256")
     val sentPasswordHash: String = BigInt(digest.digest(password.getBytes("UTF-8"))).toString(16)
 
-    val receiver = new MessageReceiver {
-      //todo replace with something working
-      override def receive(message: Message): Boolean = true
-
-      override def get(): Promise[Seq[Message]] = {
-        Promise.successful(Seq())
-      }
-    }
-
     users.getByNameAndPasswordHash(name, sentPasswordHash) flatMap {
       case None => Future.failed(new RuntimeException("invalid credentials"))
-      case Some(user) => tokens.create(user) flatMap {
-        messages.register(_, receiver)
+      case Some(user) => tokens.create(user) flatMap { token =>
+        messages.register(token, new SingleUserMessageReceiver(token))
       }
     }
   }

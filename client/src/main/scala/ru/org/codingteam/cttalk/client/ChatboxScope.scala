@@ -1,7 +1,7 @@
 package ru.org.codingteam.cttalk.client
 
 import com.greencatsoft.angularjs.core.Scope
-import ru.org.codingteam.cttalk.client.model.Chat
+import ru.org.codingteam.cttalk.client.model.{Chat, Handle}
 
 import scala.scalajs.js
 
@@ -13,6 +13,6 @@ trait ChatboxScope extends Scope {
 
   var chat: Chat = js.native
 
-  var sender: String = js.native
+  var self: Handle = js.native
   var text: String = js.native
 }

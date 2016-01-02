@@ -1,13 +1,13 @@
 package ru.org.codingteam.cttalk
 
 import org.specs2.mock.Mockito
-import play.api.libs.json.Json
-import play.api.mvc.Result
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.{Cookie, Result}
 import play.api.test.{FakeApplication, FakeRequest, PlaySpecification}
 import reactivemongo.api.commands.WriteResult
 import ru.org.codingteam.cttalk.controllers.api.SecurityController
 import ru.org.codingteam.cttalk.model.{Token, User, UserHandle}
-import ru.org.codingteam.cttalk.services.UserService
+import ru.org.codingteam.cttalk.services.{TokensRepository, UserService}
 
 import scala.concurrent.Future
 
@@ -49,7 +49,7 @@ class SecurityControllerSpec extends PlaySpecification with Mockito {
           "name" -> "new",
           "password" -> "password"
         ))
-        val controller = new SecurityController(mockUserService)
+        val controller = new SecurityController(mockUserService, mock[TokensRepository])
         status(controller.register.apply(request)) mustEqual OK
       }
     }
@@ -60,7 +60,7 @@ class SecurityControllerSpec extends PlaySpecification with Mockito {
           "name" -> "existing",
           "password" -> "password"
         ))
-        val controller = new SecurityController(mockUserService)
+        val controller = new SecurityController(mockUserService, mock[TokensRepository])
         status(controller.register.apply(request)) mustEqual UNAUTHORIZED
       }
     }
@@ -73,7 +73,7 @@ class SecurityControllerSpec extends PlaySpecification with Mockito {
           "name" -> "existing",
           "password" -> "correct"
         ))
-        val controller = new SecurityController(mockUserService)
+        val controller = new SecurityController(mockUserService, mock[TokensRepository])
         val result: Future[Result] = controller.auth.apply(request)
         status(result) mustEqual OK
         cookies(result).get("token") must not be empty
@@ -86,7 +86,7 @@ class SecurityControllerSpec extends PlaySpecification with Mockito {
           "name" -> "new",
           "password" -> "password"
         ))
-        val controller = new SecurityController(mockUserService)
+        val controller = new SecurityController(mockUserService, mock[TokensRepository])
         val result: Future[Result] = controller.auth.apply(request)
         status(result) mustEqual UNAUTHORIZED
       }
@@ -97,10 +97,42 @@ class SecurityControllerSpec extends PlaySpecification with Mockito {
           "name" -> "existing",
           "password" -> "password"
         ))
-        val controller = new SecurityController(mockUserService)
+        val controller = new SecurityController(mockUserService, mock[TokensRepository])
         val result: Future[Result] = controller.auth.apply(request)
         status(result) mustEqual UNAUTHORIZED
       }
+    }
+  }
+
+  "SecurityController.self" should {
+    "-- return Ok with handle if given a valid token" in {
+      running(FakeApplication()) {
+        val request = FakeRequest().withCookies(Cookie("token", "valid"))
+        val mockTokensRepository = mock[TokensRepository]
+        mockTokensRepository.get(anyString) returns Future.successful(Some(Token("id", UserHandle("user"))))
+
+        val controller = new SecurityController(mock[UserService], mockTokensRepository)
+        val eventualResult = controller.self.apply(request)
+        status(eventualResult) mustEqual OK
+        contentAsJson(eventualResult) must beAnInstanceOf[JsValue]
+      }
+    }
+    "-- return Unauthorized if given an invalid token" in {
+      running(FakeApplication()) {
+        val request = FakeRequest().withCookies(Cookie("token", "invalid"))
+        val mockTokensRepository = mock[TokensRepository]
+        mockTokensRepository.get(anyString) returns Future.successful(None)
+
+        val controller = new SecurityController(mock[UserService], mockTokensRepository)
+        val eventualResult = controller.self.apply(request)
+        status(eventualResult) mustEqual UNAUTHORIZED
+      }
+    }
+    "-- return Unauthorized if given no token at all" in {
+      val request = FakeRequest()
+      val controller = new SecurityController(mock[UserService], mock[TokensRepository])
+      val eventualResult = controller.self.apply(request)
+      status(eventualResult) mustEqual UNAUTHORIZED
     }
   }
 }
