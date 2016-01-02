@@ -1,12 +1,11 @@
 package ru.org.codingteam.cttalk.client.controllers
 
-import com.greencatsoft.angularjs.core.{HttpService, Location}
 import com.greencatsoft.angularjs.{AbstractController, injectable}
-import org.scalajs.dom.console
+import org.scalajs.dom.{console, window}
 import ru.org.codingteam.cttalk.client.AuthenticationScope
+import ru.org.codingteam.cttalk.client.services.AuthenticationService
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExport
 import scala.util.{Failure, Success}
 
@@ -15,19 +14,30 @@ import scala.util.{Failure, Success}
  */
 @JSExport
 @injectable("AuthenticationController")
-class AuthenticationController(scope: AuthenticationScope, http: HttpService, location: Location)
+class AuthenticationController(scope: AuthenticationScope, auth: AuthenticationService)
   extends AbstractController[AuthenticationScope](scope) {
 
   @JSExport
-  def login = {
-    http.post("/api/auth", js.Dynamic.literal("name" -> scope.login, "password" -> scope.password)).onComplete {
-      case Success(_) => location.url("/")
+  def login() = {
+    auth.authenticate(scope.login, scope.password).onComplete {
+      case Success(_) => redirectOnSuccess
       case Failure(error) => handleError(error)
     }
+  }
 
+  @JSExport
+  def signUp() = {
+    auth.register(scope.login, scope.password).onComplete {
+      case Success(_) => redirectOnSuccess
+      case Failure(error) => handleError(error)
+    }
   }
 
   def handleError(error: Throwable): Unit = {
     console.error(s"Error while authenticating: $error")
+  }
+
+  def redirectOnSuccess = {
+    window.location.href = "/"
   }
 }

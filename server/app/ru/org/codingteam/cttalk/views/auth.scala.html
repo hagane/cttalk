@@ -17,22 +17,44 @@
 </head>
 <body>
 
-<div class="container" style="padding: 60px 15px;" ng-controller="AuthenticationController">
-    <form class="form-signin">
-        <h2 class="form-signin-heading">Please sign in</h2>
-        <label for="inputLogin" class="sr-only">Name</label>
-        <input type="login" ng-model="login" id="inputLogin" class="form-control" placeholder="Screen name" required=""
-               autofocus="">
-        <label for="inputPassword" class="sr-only">Password</label>
-        <input type="password" ng-model="password" id="inputPassword" class="form-control" placeholder="Password"
-               required="">
-        <button class="btn btn-lg btn-primary btn-block" ng-click="controller.login()">Sign in</button>
-    </form>
+<div class="container" style="padding: 60px 15px;">
+
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active"><a href="#sign-up" aria-controls="sign-up" role="tab" data-toggle="tab">Sign
+            up</a></li>
+        <li role="presentation"><a href="#sign-in" aria-controls="sign-in" role="tab" data-toggle="tab">Sign in</a></li>
+    </ul>
+
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="sign-up">
+            <form class="form-signin" ng-controller="AuthenticationController">
+                <label for="suLogin" class="sr-only">Name</label>
+                <input type="login" ng-model="login" id="suLogin" class="form-control" placeholder="Screen name"
+                       required=""
+                       autofocus="">
+                <label for="suPassword" class="sr-only">Password</label>
+                <input type="password" ng-model="password" id="suPassword" class="form-control" placeholder="Password"
+                       required="">
+                <button class="btn btn-lg btn-primary btn-block" ng-click="controller.signUp()">Sign Up</button>
+            </form>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="sign-in">
+            <form class="form-signin" ng-controller="AuthenticationController">
+                <h2 class="form-signin-heading">Please sign in</h2>
+                <label for="siLogin" class="sr-only">Name</label>
+                <input type="login" ng-model="login" id="siLogin" class="form-control" placeholder="Screen name"
+                       required=""
+                       autofocus="">
+                <label for="siPassword" class="sr-only">Password</label>
+                <input type="password" ng-model="password" id="siPassword" class="form-control" placeholder="Password"
+                       required="">
+                <button class="btn btn-lg btn-primary btn-block" ng-click="controller.login()">Sign in</button>
+            </form>
+        </div>
+    </div>
 </div>
 
-<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-<!-- Latest compiled and minified JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 </body>
 </html>

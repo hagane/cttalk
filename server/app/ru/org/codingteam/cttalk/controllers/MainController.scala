@@ -8,7 +8,9 @@ import ru.org.codingteam.cttalk._
  */
 class MainController extends Controller {
 
-  def index = Action {
-    Ok(views.html.main())
+  def index = Action { implicit request: Request[AnyContent] =>
+    request.cookies.get("token") map {
+      _ => Ok(views.html.main())
+    } getOrElse Redirect(routes.AuthenticationController.main(), TEMPORARY_REDIRECT)
   }
 }

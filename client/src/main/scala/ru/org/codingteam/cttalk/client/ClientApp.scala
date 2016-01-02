@@ -2,7 +2,7 @@ package ru.org.codingteam.cttalk.client
 
 import com.greencatsoft.angularjs.Angular
 import ru.org.codingteam.cttalk.client.controllers.{AuthenticationController, ChatboxController, RosterController}
-import ru.org.codingteam.cttalk.client.services.{ChatServiceFactory, MessageServiceFactory}
+import ru.org.codingteam.cttalk.client.services.{AuthenticationServiceFactory, ChatServiceFactory, MessageServiceFactory}
 
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
@@ -16,6 +16,7 @@ object ClientApp extends JSApp {
     Angular.module("cttalk")
       .factory[MessageServiceFactory]
       .factory[ChatServiceFactory]
+      .factory[AuthenticationServiceFactory]
       .controller[RosterController]
       .controller[ChatboxController]
       .controller[AuthenticationController]

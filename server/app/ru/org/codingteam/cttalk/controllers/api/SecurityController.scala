@@ -17,7 +17,7 @@ class SecurityController @Inject()(userService: UserService) extends Controller 
     (JsPath \ 'password).read[String] tupled
 
   def register = httpsOnlyAsync(jsonAsync[(String, String)] {
-    case (name, password) => userService.createUser(name, password) map { _ => Ok} recover {
+    case (name, password) => userService.createUser(name, password) map { _ => Ok } recover {
       case _ => Unauthorized
     }
   })

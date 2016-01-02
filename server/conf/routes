@@ -1,5 +1,6 @@
 GET /   @ru.org.codingteam.cttalk.controllers.MainController.index
 GET /auth   @ru.org.codingteam.cttalk.controllers.AuthenticationController.main
+GET /signOut @ru.org.codingteam.cttalk.controllers.AuthenticationController.signOut
 
 GET /api/chats              @ru.org.codingteam.cttalk.controllers.api.ChatController.chats
 GET /api/unread/:token      @ru.org.codingteam.cttalk.controllers.api.ChatController.unread(token)
