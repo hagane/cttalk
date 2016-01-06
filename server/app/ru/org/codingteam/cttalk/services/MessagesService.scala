@@ -40,7 +40,7 @@ class MessagesServiceImpl @Inject()(messages: MessagesRepository, tokens: Tokens
   override def register(token: Token, receiver: MessageReceiver): Future[Token] = {
     Option(receivers.putIfAbsent(token, receiver)) match {
       case None => Future.successful(token)
-      case Some(_) => Future.failed(new RuntimeException("token already present"))
+      case Some(existingReceiver) => Future.successful(existingReceiver.token())
     }
   }
 

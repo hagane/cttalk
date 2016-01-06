@@ -26,7 +26,7 @@ class MessagesServiceSpec extends PlaySpecification with Mockito {
     repository
   }
 
-  private class MockReceiver extends MessageReceiver {
+  private class MockReceiver(receiverToken: Token) extends MessageReceiver {
     private val list = List.newBuilder[Message]
 
     override def receive(message: Message): Boolean = {
@@ -35,6 +35,8 @@ class MessagesServiceSpec extends PlaySpecification with Mockito {
     }
 
     def get(): Promise[Seq[Message]] = Promise.successful(list.result())
+
+    override def token(): Token = receiverToken
   }
 
   "MessageService.send" should {
@@ -46,7 +48,7 @@ class MessagesServiceSpec extends PlaySpecification with Mockito {
       mockTokens.getByHandle(any[UserHandle]) returns Future.successful(Seq(token))
 
       val service = new MessagesServiceImpl(repository, mockTokens)
-      service.register(token, new MockReceiver)
+      service.register(token, new MockReceiver(mock[Token]))
       service.send(Message(UserHandle("sender"), UserHandle("existing"), wasRead = false, new Date, "message")) map {
         result => result mustEqual true
       } await
@@ -67,12 +69,15 @@ class MessagesServiceSpec extends PlaySpecification with Mockito {
       success("tested in other tests")
     }
 
-    "-- fail if trying to register an already registered recipient" in { implicit ee: ExecutionEnv =>
+    "-- return existing token if recipient is already registered" in { implicit ee: ExecutionEnv =>
       val service = new MessagesServiceImpl(mockMessagesRepository, mock[TokensRepository])
       val token: Token = Token("receiver", UserHandle("username"))
-      service.register(token, new MockReceiver) map { _ => success } await
+      val token2: Token = Token("receiver", UserHandle("username2"))
+      service.register(token, new MockReceiver(token)) map { _ => success } await
 
-      service.register(token, new MockReceiver) must throwA[Exception].await
+      service.register(token, new MockReceiver(token2)) map {
+        _ mustEqual token
+      } await
     }
   }
 
@@ -84,7 +89,7 @@ class MessagesServiceSpec extends PlaySpecification with Mockito {
       mockTokens.getByHandle(any[Handle]) returns Future.successful(Seq(token))
       val service = new MessagesServiceImpl(mock[MessagesRepository], mockTokens)
 
-      val receiver = new MockReceiver
+      val receiver = new MockReceiver(mock[Token])
 
       service.register(token, receiver)
       service.get(Token("valid", UserHandle("user"))) map {
@@ -100,7 +105,7 @@ class MessagesServiceSpec extends PlaySpecification with Mockito {
       mockTokens.getByHandle(any[Handle]) returns Future.successful(Seq(token))
       val service = new MessagesServiceImpl(mock[MessagesRepository], mockTokens)
 
-      val receiver = new MockReceiver
+      val receiver = new MockReceiver(token)
       receiver.receive(mock[Message])
 
       service.register(token, receiver)
@@ -118,7 +123,7 @@ class MessagesServiceSpec extends PlaySpecification with Mockito {
       mockTokens.getByHandle(any[Handle]) returns Future.successful(Seq())
       val service = new MessagesServiceImpl(mock[MessagesRepository], mockTokens)
 
-      val receiver = new MockReceiver
+      val receiver = new MockReceiver(token)
 
       service.register(token, receiver)
       service.get(Token("invalid", UserHandle("user"))) must throwA[RuntimeException].await

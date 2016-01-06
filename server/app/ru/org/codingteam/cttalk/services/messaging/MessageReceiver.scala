@@ -1,6 +1,6 @@
 package ru.org.codingteam.cttalk.services.messaging
 
-import ru.org.codingteam.cttalk.model.Message
+import ru.org.codingteam.cttalk.model.{Message, Token}
 
 import scala.concurrent.Promise
 
@@ -11,4 +11,6 @@ trait MessageReceiver {
   def receive(message: Message): Boolean
 
   def get(): Promise[Seq[Message]]
+
+  def token(): Token
 }

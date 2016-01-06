@@ -22,4 +22,12 @@ class SingleUserMessageReceiverSpec extends PlaySpecification with Mockito {
       promise.isCompleted mustEqual true
     }
   }
+
+  "SingleUserMessageReceiver.token" should {
+    "-- return token this receiver is registered with" in {
+      val token = mock[Token]
+      val receiver = new SingleUserMessageReceiver(token)
+      receiver.token() mustEqual token
+    }
+  }
 }

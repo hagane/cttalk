@@ -17,14 +17,14 @@ import scala.scalajs.js.JSON
  */
 @injectable("MessageService")
 class MessageService(http: HttpService) extends Service {
-  require(http != null, s"No http service supplied.")
+  require(http != null, "No http service supplied.")
 
   def send(message: SentMessage): Unit = {
-    http.post[js.Any](s"/api/send", write(message))
+    http.post[js.Any]("/api/send", write(message))
   }
 
   def receive(): Future[ReceivedMessage] = {
-    http.get[js.Any](s"/api/receive")
+    http.get[js.Any]("/api/receive")
       .map(JSON.stringify(_))
       .map(read[ReceivedMessage])
   }

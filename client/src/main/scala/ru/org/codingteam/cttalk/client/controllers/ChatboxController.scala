@@ -1,5 +1,6 @@
 package ru.org.codingteam.cttalk.client.controllers
 
+import com.greencatsoft.angularjs.core.Timeout
 import com.greencatsoft.angularjs.{AbstractController, injectable}
 import org.scalajs.dom.{console, window}
 import ru.org.codingteam.cttalk.client.ChatboxScope
@@ -16,7 +17,7 @@ import scala.util.{Failure, Success}
  */
 @JSExport
 @injectable("ChatboxController")
-class ChatboxController(scope: ChatboxScope, chats: ChatService, messages: MessageService, authenticationService: AuthenticationService)
+class ChatboxController(scope: ChatboxScope, chats: ChatService, messages: MessageService, authenticationService: AuthenticationService, timeout: Timeout)
   extends AbstractController[ChatboxScope](scope) {
 
   authenticationService.self().onComplete {
@@ -30,10 +31,24 @@ class ChatboxController(scope: ChatboxScope, chats: ChatService, messages: Messa
     scope.chat = _
   }
 
+  receive()
+
   @JSExport
-  def post = {
+  def post() = {
     val message = ReceivedMessage(scope.self, scope.chat.handle, wasRead = false, js.Date().toString, scope.text)
     scope.chat.messages.push(message)
     messages.send(SentMessage(scope.chat.handle, scope.text))
+  }
+
+  def receive(): Unit = {
+    def r = {
+      messages.receive().andThen {
+        case Success(message) => scope.chat.messages.push(message)
+        case Failure(error) => console.log(s"Error while receiving: $error")
+      }.andThen { case _ => receive() }
+    }
+    timeout({
+      r _
+    }, 10000) //TODO make this configurable or something
   }
 }

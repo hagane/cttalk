@@ -7,7 +7,7 @@ import scala.concurrent.Promise
 /**
  * Created by hgn on 27.10.2015.
  */
-class SingleUserMessageReceiver(token: Token) extends MessageReceiver {
+class SingleUserMessageReceiver(receiverToken: Token) extends MessageReceiver {
   val promise = Promise[Seq[Message]]()
 
   override def receive(message: Message): Boolean = {
@@ -17,4 +17,6 @@ class SingleUserMessageReceiver(token: Token) extends MessageReceiver {
   override def get(): Promise[Seq[Message]] = {
     promise
   }
+
+  override def token(): Token = receiverToken
 }
