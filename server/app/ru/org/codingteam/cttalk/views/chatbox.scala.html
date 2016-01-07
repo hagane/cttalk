@@ -3,7 +3,7 @@
     <div class="panel-heading">{{chat.name}}</div>
     <div class="panel-body">
         <div ng-repeat="message in chat.messages">
-            <b>{{message.sender.name}}</b>: {{message.text}}
+            <b>{{message.sender.user}}</b>: {{message.text}}
         </div>
     </div>
     <div class="panel-footer">
