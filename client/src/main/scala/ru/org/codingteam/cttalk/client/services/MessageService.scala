@@ -23,10 +23,10 @@ class MessageService(http: HttpService) extends Service {
     http.post[js.Any]("/api/send", write(message))
   }
 
-  def receive(): Future[ReceivedMessage] = {
+  def receive(): Future[Seq[ReceivedMessage]] = {
     http.get[js.Any]("/api/receive")
       .map(JSON.stringify(_))
-      .map(read[ReceivedMessage])
+      .map(read[Seq[ReceivedMessage]])
   }
 }
 

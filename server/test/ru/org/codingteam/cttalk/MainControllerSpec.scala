@@ -31,6 +31,7 @@ class MainControllerSpec extends PlaySpecification with Mockito {
 
         status(eventualResult) mustEqual OK
         contentAsString(eventualResult).isEmpty must beFalse
+        there was one(mockMessages).register(any[Token], any[MessageReceiver])
       }
     }
 

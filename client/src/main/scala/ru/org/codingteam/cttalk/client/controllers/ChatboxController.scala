@@ -8,7 +8,6 @@ import ru.org.codingteam.cttalk.client.model.{ReceivedMessage, SentMessage}
 import ru.org.codingteam.cttalk.client.services.{AuthenticationService, ChatService, MessageService}
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExport
 import scala.util.{Failure, Success}
 
@@ -35,7 +34,7 @@ class ChatboxController(scope: ChatboxScope, chats: ChatService, messages: Messa
 
   @JSExport
   def post() = {
-    val message = ReceivedMessage(scope.self, scope.chat.handle, wasRead = false, js.Date().toString, scope.text)
+    val message = ReceivedMessage(scope.self, scope.chat.handle, wasRead = false, scope.text)
     scope.chat.messages.push(message)
     messages.send(SentMessage(scope.chat.handle, scope.text))
   }
@@ -43,7 +42,7 @@ class ChatboxController(scope: ChatboxScope, chats: ChatService, messages: Messa
   def receive(): Unit = {
     def r = {
       messages.receive().andThen {
-        case Success(message) => scope.chat.messages.push(message)
+        case Success(receivedMessages) => receivedMessages.foreach(scope.chat.messages.push(_))
         case Failure(error) => console.log(s"Error while receiving: $error")
       }.andThen { case _ => receive() }
     }

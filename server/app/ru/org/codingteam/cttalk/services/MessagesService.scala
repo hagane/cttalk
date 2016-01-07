@@ -3,7 +3,7 @@ package ru.org.codingteam.cttalk.services
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
-import com.google.inject.ImplementedBy
+import com.google.inject.{ImplementedBy, Singleton}
 import play.api.libs.concurrent.Execution.Implicits._
 import ru.org.codingteam.cttalk.model.{Message, Token}
 import ru.org.codingteam.cttalk.services.messaging.{MessageReceiver, SingleUserMessageReceiver}
@@ -22,6 +22,7 @@ trait MessagesService {
   def register(token: Token, receiver: MessageReceiver): Future[Token]
 }
 
+@Singleton
 class MessagesServiceImpl @Inject()(messages: MessagesRepository, tokens: TokensRepository) extends MessagesService {
   val receivers = new ConcurrentHashMap[Token, MessageReceiver]
 
@@ -48,7 +49,7 @@ class MessagesServiceImpl @Inject()(messages: MessagesRepository, tokens: Tokens
     Option(receivers.get(token)) map {
       _.get().future
     } getOrElse {
-      Future.failed(new RuntimeException)
+      Future.failed(new RuntimeException(s"Receiver for ${token._id} not found."))
     }
   }
 }
