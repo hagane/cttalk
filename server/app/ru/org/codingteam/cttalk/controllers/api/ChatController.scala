@@ -1,28 +1,26 @@
 package ru.org.codingteam.cttalk.controllers.api
 
+import com.google.inject.Inject
+import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json._
 import play.api.mvc._
+import ru.org.codingteam.cttalk.model.Handle._
+import ru.org.codingteam.cttalk.services.{TokensRepository, UserRepository}
 
-import scala.util.Random
+import scala.concurrent.Future
 
 /**
  * Created by hgn on 26.08.2015.
  */
-class ChatController extends Controller {
+class ChatController @Inject()(tokens: TokensRepository, users: UserRepository) extends Controller with Secure {
 
-  def chats = Action {
-    val chats = Json.arr(
-      Json.obj(
-        "handle" -> Json.obj("user" -> "ct"),
-        "name" -> "Codingteam",
-        "messages" -> Json.arr()
-      )
-    )
-    Ok(Json.stringify(chats))
+  def chats = withAuthCookie("token") { cookie => implicit request =>
+    tokens.get(cookie.value) flatMap {
+      case Some(token) => users.getByToken(token)
+      case None => Future.successful(None)
+    } map {
+      case Some(user) => Ok(Json.toJson(user.roster))
+      case None => Unauthorized
+    }
   }
-
-  def unread(token: String) = Action {
-    Ok(Json.stringify(JsNumber(new Random().nextInt(20))))
-  }
-
 }

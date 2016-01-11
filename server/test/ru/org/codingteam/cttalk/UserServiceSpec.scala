@@ -41,7 +41,7 @@ class UserServiceSpec extends PlaySpecification with Mockito {
   "UserService.createUser" should {
     "-- write user to db if there is no user with given name" in { implicit ee: ExecutionEnv =>
       val mockUserRepository = mock[UserRepository]
-      mockUserRepository.save(org.mockito.Matchers.any[User]) returns Future.successful(User("", ""))
+      mockUserRepository.save(org.mockito.Matchers.any[User]) returns Future.successful(User("", "", Seq()))
 
       val service = new UserServiceImpl(mockUserRepository, mockTokensRepository, mockMessagesService)
       service.createUser("testname", "test") map { user => user must beAnInstanceOf[User] } await
@@ -75,7 +75,7 @@ class UserServiceSpec extends PlaySpecification with Mockito {
       val successfulResult = mock[WriteResult]
       successfulResult.ok returns true
 
-      mockUsersRepository.getByNameAndPasswordHash(anyString, anyString) returns Future.successful(Some(User("testname", hash)))
+      mockUsersRepository.getByNameAndPasswordHash(anyString, anyString) returns Future.successful(Some(User("testname", hash, Seq())))
 
       val service = new UserServiceImpl(mockUsersRepository, mockTokensRepository, mockMessagesService)
       service.auth("testname", "testpassword") map { result => result must beAnInstanceOf[Token] } await
@@ -89,7 +89,7 @@ class UserServiceSpec extends PlaySpecification with Mockito {
       val successfulResult = mock[WriteResult]
       successfulResult.ok returns true
 
-      mockUsersRepository.getByNameAndPasswordHash(anyString, anyString) returns Future.successful(Some(User("testname", hash)))
+      mockUsersRepository.getByNameAndPasswordHash(anyString, anyString) returns Future.successful(Some(User("testname", hash, Seq())))
       val messagesService = mockMessagesService
       val service = new UserServiceImpl(mockUsersRepository, mockTokensRepository, messagesService)
       service.auth("testname", "testpassword") map { result => result must beAnInstanceOf[Token] } await
@@ -115,7 +115,7 @@ class UserServiceSpec extends PlaySpecification with Mockito {
       val newToken = "token"
       val mockUsersRepository = mock[UserRepository]
 
-      mockUsersRepository.getByNameAndPasswordHash(anyString, anyString) returns Future.successful(Some(User("testname", hash)))
+      mockUsersRepository.getByNameAndPasswordHash(anyString, anyString) returns Future.successful(Some(User("testname", hash, Seq())))
 
       val service = new UserServiceImpl(mockUsersRepository, mockTokensRepository, mockMessagesService)
       service.auth("testname", "wrongpassword") must throwA[Exception].await

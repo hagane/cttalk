@@ -25,7 +25,7 @@ class UserServiceImpl @Inject()(users: UserRepository, tokens: TokensRepository,
   def createUser(name: String, password: String): Future[User] = {
     val digest: MessageDigest = MessageDigest.getInstance("SHA-256")
     val hashedPassword: String = BigInt(digest.digest(password.getBytes("UTF-8"))).toString(16)
-    val user = User(name, hashedPassword)
+    val user = User(name, hashedPassword, Seq())
     users.save(user)
   }
 

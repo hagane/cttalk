@@ -28,6 +28,10 @@ class ChatService(http: HttpService) extends Service {
     }
   }
 
+  def addChat(chat: Chat) = {
+    http.post("/api/chats/add", write(chat.handle))
+  }
+
   def select(chat: Chat): Unit = {
     chat.messages.foreach {
       _.wasRead = true

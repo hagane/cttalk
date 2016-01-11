@@ -29,7 +29,7 @@ class SecurityControllerSpec extends PlaySpecification with Mockito {
     service.createUser(anyString, anyString) answers { args =>
       args match {
         case Array("existing", _) => Future.failed(new Throwable)
-        case _ => Future.successful(User("", ""))
+        case _ => Future.successful(User("", "", Seq()))
       }
     }
 

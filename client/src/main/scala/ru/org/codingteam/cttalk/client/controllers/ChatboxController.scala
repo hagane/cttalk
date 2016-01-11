@@ -3,11 +3,12 @@ package ru.org.codingteam.cttalk.client.controllers
 import com.greencatsoft.angularjs.core.Timeout
 import com.greencatsoft.angularjs.{AbstractController, injectable}
 import org.scalajs.dom.{console, window}
-import ru.org.codingteam.cttalk.client.ChatboxScope
-import ru.org.codingteam.cttalk.client.model.{ReceivedMessage, SentMessage}
+import ru.org.codingteam.cttalk.client.model.{Chat, ReceivedMessage, SentMessage}
 import ru.org.codingteam.cttalk.client.services.{AuthenticationService, ChatService, MessageService}
+import ru.org.codingteam.cttalk.client.{ChatboxScope, RosterScope}
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExport
 import scala.util.{Failure, Success}
 
@@ -16,7 +17,7 @@ import scala.util.{Failure, Success}
  */
 @JSExport
 @injectable("ChatboxController")
-class ChatboxController(scope: ChatboxScope, chats: ChatService, messages: MessageService, authenticationService: AuthenticationService, timeout: Timeout)
+class ChatboxController(scope: ChatboxScope, rosterScope: RosterScope, chats: ChatService, messages: MessageService, authenticationService: AuthenticationService, timeout: Timeout)
   extends AbstractController[ChatboxScope](scope) {
 
   authenticationService.self().onComplete {
@@ -42,7 +43,20 @@ class ChatboxController(scope: ChatboxScope, chats: ChatService, messages: Messa
   def receive(): Unit = {
     def r = {
       messages.receive().andThen {
-        case Success(receivedMessages) => receivedMessages.foreach(scope.chat.messages.push(_))
+        case Success(receivedMessages) => {
+          receivedMessages.foreach { message =>
+            val from = message.sender
+            rosterScope.chats.find(_.handle == from).orElse {
+              val newChat = Chat(from, from.user, js.Array())
+              rosterScope.chats.push(newChat)
+              chats.addChat(newChat)
+              Some(newChat)
+            } foreach { chat =>
+              chat.messages.push(message)
+              chat.unread += 1
+            }
+          }
+        }
         case Failure(error) => console.log(s"Error while receiving: $error")
       }.andThen { case _ => receive() }
     }

@@ -3,7 +3,6 @@ GET /auth   @ru.org.codingteam.cttalk.controllers.AuthenticationController.main
 GET /signOut @ru.org.codingteam.cttalk.controllers.AuthenticationController.signOut
 
 GET /api/chats              @ru.org.codingteam.cttalk.controllers.api.ChatController.chats
-GET /api/unread/:token      @ru.org.codingteam.cttalk.controllers.api.ChatController.unread(token)
 
 POST /api/register          @ru.org.codingteam.cttalk.controllers.api.SecurityController.register
 POST /api/auth              @ru.org.codingteam.cttalk.controllers.api.SecurityController.auth

@@ -9,7 +9,7 @@ import play.api.libs.json.{JsPath, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import play.modules.reactivemongo.json._
 import play.modules.reactivemongo.json.collection.JSONCollection
-import ru.org.codingteam.cttalk.model.{Token, User, UserHandle}
+import ru.org.codingteam.cttalk.model.{Handle, Token, User, UserHandle}
 
 import scala.concurrent.Future
 
@@ -28,11 +28,14 @@ trait UserRepository {
 class UserRepositoryImpl @Inject()(mongo: ReactiveMongoApi) extends UserRepository {
 
   implicit val reads = ((JsPath \ "name").read[String] and
-    (JsPath \ "passwordHash").read[String])(User.apply _)
+    (JsPath \ "passwordHash").read[String] and
+    (JsPath \ "roster").read[Seq[Handle]]) (User.apply _)
 
   override def getByNameAndPasswordHash(name: String, passwordHash: String): Future[Option[User]] = {
     users.find(Json.obj("name" -> name, "passwordHash" -> passwordHash)).one[User]
   }
+
+  def users: JSONCollection = mongo.db.collection[JSONCollection]("users")
 
   override def getByToken(token: Token): Future[Option[User]] = {
     token.handle match {
@@ -41,13 +44,12 @@ class UserRepositoryImpl @Inject()(mongo: ReactiveMongoApi) extends UserReposito
     }
   }
 
-  def users: JSONCollection = mongo.db.collection[JSONCollection]("users")
-
   override def save(user: User): Future[User] = {
     val jsonUser = Json.obj(
       "_id" -> user.name,
       "name" -> user.name,
-      "passwordHash" -> user.passwordHash
+      "passwordHash" -> user.passwordHash,
+      "roster" -> Json.arr()
     )
     users.insert(jsonUser) map { _ => user }
   }
