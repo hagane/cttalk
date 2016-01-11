@@ -42,14 +42,18 @@ class ChatboxController(scope: ChatboxScope, rosterScope: RosterScope, chats: Ch
 
   def receive(): Unit = {
     def r = {
+      //todo this should be simplified somehow
       messages.receive().andThen {
         case Success(receivedMessages) => {
           receivedMessages.foreach { message =>
             val from = message.sender
             rosterScope.chats.find(_.handle == from).orElse {
-              val newChat = Chat(from, from.user, js.Array())
+              val newChat = Chat(from, js.Array())
               rosterScope.chats.push(newChat)
-              chats.addChat(newChat)
+              chats.addChat(newChat).onFailure { case error =>
+                console.log(s"Cannot add [$newChat] to roster: $error")
+                rosterScope.chats -= newChat
+              }
               Some(newChat)
             } foreach { chat =>
               chat.messages.push(message)

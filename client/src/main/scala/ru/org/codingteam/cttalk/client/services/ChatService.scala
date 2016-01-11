@@ -2,7 +2,7 @@ package ru.org.codingteam.cttalk.client.services
 
 import com.greencatsoft.angularjs.core.HttpService
 import com.greencatsoft.angularjs.{Factory, Service, injectable}
-import ru.org.codingteam.cttalk.client.model.Chat
+import ru.org.codingteam.cttalk.client.model.{Chat, Handle}
 import upickle.default._
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -24,12 +24,12 @@ class ChatService(http: HttpService) extends Service {
     http.get[js.Array[js.Any]]("/api/chats") map {
       array => array map {
         JSON.stringify(_)
-      } map read[Chat]
+      } map read[Handle] map { handle => Chat(handle, js.Array()) }
     }
   }
 
   def addChat(chat: Chat) = {
-    http.post("/api/chats/add", write(chat.handle))
+    http.post[Chat]("/api/chats/add", write(chat.handle))
   }
 
   def select(chat: Chat): Unit = {

@@ -3,6 +3,7 @@ GET /auth   @ru.org.codingteam.cttalk.controllers.AuthenticationController.main
 GET /signOut @ru.org.codingteam.cttalk.controllers.AuthenticationController.signOut
 
 GET /api/chats              @ru.org.codingteam.cttalk.controllers.api.ChatController.chats
+POST /api/chats/add         @ru.org.codingteam.cttalk.controllers.api.ChatController.add
 
 POST /api/register          @ru.org.codingteam.cttalk.controllers.api.SecurityController.register
 POST /api/auth              @ru.org.codingteam.cttalk.controllers.api.SecurityController.auth
@@ -10,5 +11,3 @@ GET /api/self               @ru.org.codingteam.cttalk.controllers.api.SecurityCo
 
 POST /api/send              @ru.org.codingteam.cttalk.controllers.api.MessageController.send
 GET /api/receive            @ru.org.codingteam.cttalk.controllers.api.MessageController.receive
-
-GET /assets/*file           controllers.Assets.at(path="/public", file)
